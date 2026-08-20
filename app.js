@@ -86,12 +86,60 @@ function downloadQR(){
   setTimeout(()=>{const q=holder.querySelector('canvas')||holder.querySelector('img'); if(q)ctx.drawImage(q,(size-qrSize)/2,45,qrSize,qrSize); ctx.textAlign='center'; ctx.fillStyle='#211C18'; ctx.font='600 34px Inter,Arial,sans-serif'; ctx.fillText('UPI ID',size/2,875); ctx.font='500 38px "IBM Plex Mono",monospace'; ctx.fillText(UPI_ID,size/2,925); ctx.fillStyle='#5B5148'; ctx.font='400 27px Inter,Arial,sans-serif'; ctx.fillText('Red Dot Drive 2026',size/2,985); const a=document.createElement('a'); a.href=canvas.toDataURL('image/png'); a.download=`red-dot-drive-2026-payment-${amount}.png`; a.click(); holder.remove();},200);
 }
 
+function donorFormReady(){
+  const name=$('donorName')?.value.trim();
+  const phone=$('donorPhone')?.value.trim();
+  const amount=currentAmount();
+  const txid=$('transactionId')?.value.trim();
+  const file=$('transactionSnapshot')?.files?.[0];
+  return Boolean(name && phone && phone.replace(/\D/g,'').length >= 10 && amount && (txid || file));
+}
+
+function updateSubmitVerificationButton(){
+  const btn=$('submitVerificationBtn');
+  if(!btn)return;
+  const ready=donorFormReady();
+  btn.classList.toggle('ready',ready);
+  const note=$('submitVerificationNote');
+  if(note)note.classList.toggle('ready',ready);
+}
+
+function ensureSubmitVerificationButton(){
+  const amountRow=document.querySelector('.amount-input-row');
+  if(!amountRow)return;
+  let btn=$('submitVerificationBtn');
+  if(!btn){
+    btn=document.createElement('button');
+    btn.id='submitVerificationBtn';
+    btn.type='button';
+    btn.textContent='Submit for verification';
+    btn.addEventListener('click',startVerification);
+    amountRow.insertAdjacentElement('afterend',btn);
+
+    const style=document.createElement('style');
+    style.id='verification-submit-style';
+    style.textContent=`
+      #submitVerificationBtn{width:100%;margin:2px 0 8px;padding:14px 18px;border:0;border-radius:10px;background:var(--red);color:#fff;font-size:15px;font-weight:700;cursor:pointer;display:none;box-shadow:0 8px 18px -10px rgba(194,30,58,.6)}
+      #submitVerificationBtn.ready{display:block}
+      #submitVerificationBtn.ready:hover{transform:translateY(-1px)}
+      .submit-verification-note{display:none;font-size:11.5px;color:var(--ink-soft);line-height:1.5;text-align:center;margin:0 0 4px}
+      .submit-verification-note.ready{display:block}
+    `;
+    document.head.appendChild(style);
+    const note=document.createElement('div');
+    note.id='submitVerificationNote';
+    note.className='submit-verification-note';
+    note.textContent='Your details are complete. Submit them for verification.';
+    btn.insertAdjacentElement('afterend',note);
+  }
+  updateSubmitVerificationButton();
+}
+
 function arrangeDonationModal(){
   const modal=document.querySelector('.modal');
   if(!modal) return;
   const title=modal.querySelector('.modal-title');
   if(title) title.textContent='Fill the details for transaction verification';
-
   if(modal.dataset.landscapeReady==='1') return;
 
   const qr=document.getElementById('qrBlock');
@@ -103,28 +151,21 @@ function arrangeDonationModal(){
 
   const layout=document.createElement('div');
   layout.className='donation-landscape';
-  const payment=document.createElement('div');
-  payment.className='donation-payment-panel';
-  const details=document.createElement('div');
-  details.className='donation-details-panel';
+  const payment=document.createElement('div'); payment.className='donation-payment-panel';
+  const details=document.createElement('div'); details.className='donation-details-panel';
   layout.append(payment,details);
-
   payment.appendChild(qr);
   if(callout) payment.appendChild(callout);
   details.appendChild(donorFields);
   if(amountChips) details.appendChild(amountChips);
   if(amountRow) details.appendChild(amountRow);
 
-  // Move the remaining transaction-proof fields into the details panel while preserving IDs/listeners.
-  const proofIds=['transactionId','transactionSnapshot','donorNote'];
-  proofIds.forEach(id=>{
-    const el=document.getElementById(id);
-    if(!el) return;
+  ['transactionId','transactionSnapshot','donorNote'].forEach(id=>{
+    const el=document.getElementById(id); if(!el)return;
     const wrapper=el.closest('.form-field') || el.parentElement;
     if(wrapper && wrapper !== donorFields && !wrapper.closest('.donation-details-panel')) details.appendChild(wrapper);
   });
 
-  // Put the layout immediately after the modal header/subtitle and remove the old flow nodes from normal order.
   const sub=modal.querySelector('.modal-sub');
   if(sub) sub.insertAdjacentElement('afterend',layout); else modal.insertBefore(layout,modal.firstChild);
 
@@ -142,20 +183,13 @@ function arrangeDonationModal(){
     .donation-details-panel input,.donation-details-panel select,.donation-details-panel textarea{width:100%;}
     .donation-details-panel .amount-chips{margin-bottom:12px;}
     .donation-details-panel .amount-input-row{margin-bottom:14px;}
-    .donation-details-panel .modal-callout{margin-top:14px;}
-    @media(max-width:700px){
-      .modal{width:100%;max-width:100%;border-radius:20px 20px 0 0;padding:24px 18px 28px;}
-      .donation-landscape{grid-template-columns:1fr;gap:16px;}
-      .donation-payment-panel{min-height:0;padding:16px;}
-      .donation-details-panel{padding:16px;}
-      .modal-title{font-size:21px;}
-    }
+    @media(max-width:700px){.modal{width:100%;max-width:100%;border-radius:20px 20px 0 0;padding:24px 18px 28px}.donation-landscape{grid-template-columns:1fr;gap:16px}.donation-payment-panel{min-height:0;padding:16px}.donation-details-panel{padding:16px}.modal-title{font-size:21px;}}
   `;
   modal.appendChild(style);
   modal.dataset.landscapeReady='1';
 }
 
-function openModal(){ arrangeDonationModal(); $('overlay').classList.add('open'); document.body.style.overflow='hidden'; renderQR(); }
+function openModal(){ arrangeDonationModal(); ensureSubmitVerificationButton(); $('overlay').classList.add('open'); document.body.style.overflow='hidden'; renderQR(); updateSubmitVerificationButton(); }
 function closeModal(ask=true){ if(!$('overlay').classList.contains('open'))return; if(ask&&(pendingAmount||currentAmount())) return openVerification(); $('overlay').classList.remove('open'); document.body.style.overflow=''; }
 function openVerification(){ const amount=pendingAmount||currentAmount(); if(!amount)return closeModal(false); $('verificationAmount').textContent=fmtINR(amount); $('verificationQuestion').style.display='block'; $('sharePrompt').classList.remove('open'); $('shareActions').style.display='none'; $('verificationOverlay').classList.add('open'); document.body.style.overflow='hidden'; }
 function closeVerification(){ $('verificationOverlay').classList.remove('open'); $('overlay').classList.remove('open'); document.body.style.overflow=''; }
@@ -176,5 +210,5 @@ async function confirmSharedAndClose(){ try{ await markTransactionShared(); clos
 function selectAmount(amount){ document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active')); const c=[...document.querySelectorAll('.chip')].find(x=>Number(x.dataset.amt)===Number(amount)); if(c)c.classList.add('active'); $('amountInput').value=amount; pendingAmount=Number(amount); renderQR(pendingAmount); }
 async function copyUPI(){ try{await navigator.clipboard.writeText(UPI_ID); showToast('UPI ID copied');}catch{showToast(`UPI ID: ${UPI_ID}`);} }
 
-document.addEventListener('DOMContentLoaded',async()=>{ document.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',()=>selectAmount(Number(c.dataset.amt)))); $('amountInput')?.addEventListener('input',()=>{pendingAmount=currentAmount(); renderQR(pendingAmount||1);}); $('transactionId')?.addEventListener('input',()=>{if($('transactionId').value.trim()) $('transactionSnapshot').value='';}); $('transactionSnapshot')?.addEventListener('change',()=>{if($('transactionSnapshot').files.length) $('transactionId').value='';}); try{await loadProgress(); await renderDonationStatus(); statusPoll=setInterval(async()=>{try{await loadProgress();await renderDonationStatus();}catch{}} ,30000);}catch(e){console.error(e);showToast('Unable to connect to the donation database.');} });
+document.addEventListener('DOMContentLoaded',async()=>{ document.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',()=>{selectAmount(Number(c.dataset.amt));updateSubmitVerificationButton();})); $('amountInput')?.addEventListener('input',()=>{pendingAmount=currentAmount(); renderQR(pendingAmount||1); updateSubmitVerificationButton();}); ['donorName','donorPhone','donorNote'].forEach(id=>$(id)?.addEventListener('input',updateSubmitVerificationButton)); $('transactionId')?.addEventListener('input',()=>{if($('transactionId').value.trim()) $('transactionSnapshot').value=''; updateSubmitVerificationButton();}); $('transactionSnapshot')?.addEventListener('change',()=>{if($('transactionSnapshot').files.length) $('transactionId').value=''; updateSubmitVerificationButton();}); try{await loadProgress(); await renderDonationStatus(); statusPoll=setInterval(async()=>{try{await loadProgress();await renderDonationStatus();}catch{}} ,30000);}catch(e){console.error(e);showToast('Unable to connect to the donation database.');} });
 window.openModal=openModal; window.closeModal=closeModal; window.closeVerification=closeVerification; window.downloadQR=downloadQR; window.copyUPI=copyUPI; window.toggleQR=()=>renderQR(); window.verifyPaidAndShared=startVerification; window.showSharePrompt=startVerification; window.confirmSharedAndClose=confirmSharedAndClose;
