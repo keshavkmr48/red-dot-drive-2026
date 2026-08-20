@@ -85,7 +85,21 @@ function downloadQR(){
   new QRCode(holder,{text:uri,width:qrSize,height:qrSize,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M});
   setTimeout(()=>{const q=holder.querySelector('canvas')||holder.querySelector('img'); if(q)ctx.drawImage(q,(size-qrSize)/2,45,qrSize,qrSize); ctx.textAlign='center'; ctx.fillStyle='#211C18'; ctx.font='600 34px Inter,Arial,sans-serif'; ctx.fillText('UPI ID',size/2,875); ctx.font='500 38px "IBM Plex Mono",monospace'; ctx.fillText(UPI_ID,size/2,925); ctx.fillStyle='#5B5148'; ctx.font='400 27px Inter,Arial,sans-serif'; ctx.fillText('Red Dot Drive 2026',size/2,985); const a=document.createElement('a'); a.href=canvas.toDataURL('image/png'); a.download=`red-dot-drive-2026-payment-${amount}.png`; a.click(); holder.remove();},200);
 }
-function openModal(){ $('overlay').classList.add('open'); document.body.style.overflow='hidden'; renderQR(); }
+
+function arrangeDonationModal(){
+  const modal=document.querySelector('.modal');
+  const qr=document.getElementById('qrBlock');
+  const donorFields=document.querySelector('.donor-fields');
+  if(!modal||!qr||!donorFields)return;
+
+  // Put the payment information first so the donor can immediately scan/pay.
+  // Keep the collection fields below the QR and UPI ID.
+  const callout=modal.querySelector('.modal-callout');
+  if(callout) callout.insertAdjacentElement('afterend',qr);
+  else modal.insertBefore(qr, donorFields);
+}
+
+function openModal(){ arrangeDonationModal(); $('overlay').classList.add('open'); document.body.style.overflow='hidden'; renderQR(); }
 function closeModal(ask=true){ if(!$('overlay').classList.contains('open'))return; if(ask&&(pendingAmount||currentAmount())) return openVerification(); $('overlay').classList.remove('open'); document.body.style.overflow=''; }
 function openVerification(){ const amount=pendingAmount||currentAmount(); if(!amount)return closeModal(false); $('verificationAmount').textContent=fmtINR(amount); $('verificationQuestion').style.display='block'; $('sharePrompt').classList.remove('open'); $('shareActions').style.display='none'; $('verificationOverlay').classList.add('open'); document.body.style.overflow='hidden'; }
 function closeVerification(){ $('verificationOverlay').classList.remove('open'); $('overlay').classList.remove('open'); document.body.style.overflow=''; }
