@@ -302,6 +302,57 @@
   .scholarship-card p:last-child{margin-bottom:0;}
   .scholarship-card a{color:var(--red-deep); font-weight:600; text-decoration:underline;}
 
+  .payment-reminder{
+    background:var(--paper-2); border:1px solid var(--line); border-radius:10px;
+    padding:12px 14px; font-size:12.5px; line-height:1.55; color:var(--ink-soft);
+    margin-bottom:18px;
+  }
+  .payment-reminder strong{color:var(--ink);}
+  .payment-reminder a{color:var(--red-deep); font-weight:600; text-decoration:underline;}
+  .verification-overlay{
+    position:fixed; inset:0; background:rgba(33,28,24,0.55); display:none;
+    align-items:flex-end; justify-content:center; z-index:120; backdrop-filter:blur(2px);
+  }
+  .verification-overlay.open{display:flex;}
+  .verification-modal{
+    background:var(--paper); width:100%; max-width:440px; border-radius:20px 20px 0 0;
+    padding:26px 24px 30px; animation:rise .28s ease;
+  }
+  @media(min-width:600px){
+    .verification-overlay{align-items:center;}
+    .verification-modal{border-radius:20px; margin-bottom:24px;}
+  }
+  .verification-modal h3{
+    font-family:'Fraunces',serif; font-size:24px; line-height:1.15; margin:0 0 10px;
+  }
+  .verification-modal p{
+    font-size:14px; line-height:1.6; color:var(--ink-soft); margin:0 0 18px;
+  }
+  .verification-actions{display:grid; gap:10px;}
+  .verification-actions button, .verification-actions a{
+    width:100%; padding:12px 14px; border-radius:10px; font-weight:600;
+    font-size:13.5px; cursor:pointer; text-align:center; text-decoration:none;
+  }
+  .verify-yes{background:var(--red); color:var(--white); border:none;}
+  .verify-share{background:var(--white); color:var(--ink); border:1px solid var(--line);}
+  .verify-no{background:transparent; color:var(--ink-soft); border:1px solid var(--line);}
+  .verify-note{
+    display:none; background:var(--paper-2); border-radius:10px; padding:12px 14px;
+    font-size:12.5px; line-height:1.55; color:var(--ink-soft); margin:0 0 14px;
+  }
+  .verify-note.open{display:block;}
+  .whatsapp-btn{background:var(--ink); color:var(--paper) !important;}
+  .whatsapp-btn + button{margin-top:0;}
+  .verify-success{
+    display:none; text-align:center; padding:4px 0 2px;
+  }
+  .verify-success.open{display:block;}
+  .verify-success .success-icon{
+    width:44px; height:44px; border-radius:50%; background:var(--red);
+    color:var(--white); display:flex; align-items:center; justify-content:center;
+    margin:0 auto 12px; font-size:20px;
+  }
+
   @media (prefers-reduced-motion: reduce){
     *{animation:none !important; transition:none !important;}
   }
@@ -360,7 +411,7 @@
   <div class="callout">
     <div class="callout-icon">📸</div>
     <p>
-      <strong>Post donation: send your payment screenshot to Keshav</strong> on
+      <strong>Post donation: send your transaction details to Keshav</strong> on
       WhatsApp <a href="https://wa.me/919582621307" target="_blank" rel="noopener">+91-9582621307</a>
       or Instagram <a href="https://instagram.com/iamfuturistmonk" target="_blank" rel="noopener">@iamfuturistmonk</a>
       to have it added to the official tally. Need an <strong>80G tax receipt</strong>?
@@ -518,7 +569,7 @@
     <div class="upi">UPI ID: <span class="mono">youthdreamersindia@kotak</span></div>
     <div class="organizer">Benefiting Youth Dreamers Foundation · organized by Keshav</div>
     <div class="footer-note">
-      Post donation: send your payment screenshot to <strong>Keshav</strong> on
+      Post donation: send your transaction details to <strong>Keshav</strong> on
       <a href="https://wa.me/919582621307" target="_blank" rel="noopener">WhatsApp +91-9582621307</a>
       or <a href="https://instagram.com/iamfuturistmonk" target="_blank" rel="noopener">Instagram @iamfuturistmonk</a>
       to have it added to the official tally. Need an 80G tax receipt?
@@ -537,7 +588,7 @@
     <div class="modal-sub">Scan the QR code or copy the UPI ID to donate.</div>
 
     <div class="modal-callout">
-      📸 <strong>After paying, send your screenshot to Keshav</strong> on
+      📸 <strong>After paying, send your transaction details to Keshav</strong> on
       <a href="https://wa.me/919582621307" target="_blank" rel="noopener">WhatsApp +91-9582621307</a>
       or <a href="https://instagram.com/iamfuturistmonk" target="_blank" rel="noopener">Instagram @iamfuturistmonk</a>
       — that's what gets it added to the tally. Need an 80G receipt? Ask in the same DM.
@@ -567,13 +618,46 @@
     <div class="confirm-banner" id="confirmBanner">
       <p>Welcome back — did you complete the <strong id="confirmAmt"></strong> donation?</p>
       <div class="confirm-actions">
-        <button class="btn-yes" onclick="confirmDonation(true)">Yes, count it</button>
+        <button class="btn-yes" onclick="confirmDonation(true)">Yes, I paid</button>
         <button class="btn-no" onclick="confirmDonation(false)">Not yet</button>
       </div>
-      <p class="confirm-followup">One more step: send your payment screenshot to <strong>Keshav</strong> on
-          <a href="https://wa.me/919582621307" target="_blank" rel="noopener">WhatsApp +91-9582621307</a>
-          or <a href="https://instagram.com/iamfuturistmonk" target="_blank" rel="noopener">Instagram @iamfuturistmonk</a>
-          so it's added to the official tally — and to receive an 80G tax receipt, ask him for that in the same message.</p>
+      <p class="confirm-followup">Your donation will be counted only after the transaction details are shared with Keshav on WhatsApp.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ---------- Donation verification modal ---------- -->
+<div class="verification-overlay" id="verificationOverlay" onclick="if(event.target===this) closeVerification()">
+  <div class="verification-modal">
+    <div id="verificationQuestion">
+      <h3>Before you leave</h3>
+      <p>
+        Have you completed the <strong id="verificationAmount"></strong> donation
+        and shared the transaction details with Keshav on WhatsApp?
+      </p>
+      <div class="verification-actions">
+        <button class="verify-yes" onclick="verifyPaidAndShared()">Yes, I paid & shared transaction details</button>
+        <button class="verify-share" onclick="showSharePrompt()">I paid, but haven't shared transaction details yet</button>
+        <button class="verify-no" onclick="closeVerification()">Not yet</button>
+      </div>
+    </div>
+
+    <div class="verify-note" id="sharePrompt">
+      Please share your transaction details with Keshav first. Then return here and click
+      <strong>I've shared the transaction details</strong> so your donation can be added to the tracker.
+    </div>
+
+    <div class="verification-actions" id="shareActions" style="display:none;">
+      <a class="whatsapp-btn" href="https://wa.me/919582621307" target="_blank" rel="noopener">Share Screenshot on WhatsApp</a>
+      <button class="verify-yes" onclick="verifyPaidAndShared()">I've shared the transaction details</button>
+      <button class="verify-no" onclick="closeVerification()">Close</button>
+    </div>
+
+    <div class="verify-success" id="verificationSuccess">
+      <div class="success-icon">✓</div>
+      <h3>Donation added</h3>
+      <p>Thank you. Your contribution has been added to the Red Dot Drive goal tracker.</p>
+      <button class="verify-yes" style="width:100%;padding:12px 14px;border-radius:10px;font-weight:600;font-size:13.5px;cursor:pointer;" onclick="closeVerification()">Done</button>
     </div>
   </div>
 </div>
@@ -588,10 +672,18 @@
   const GOAL     = 500000;
   const DEADLINE = new Date('2026-09-05T23:59:59+05:30');
   const STORAGE_KEY = 'reddotdrive2026_raised_v1';
+  const INITIAL_RAISED = 25003;
   const DONORS_KEY   = 'reddotdrive2026_donors_v1';
 
   // ---------- Storage helpers ----------
-  function getRaised(){ return parseFloat(localStorage.getItem(STORAGE_KEY) || '0'); }
+  function getRaised(){
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if(stored === null){
+      localStorage.setItem(STORAGE_KEY, String(INITIAL_RAISED));
+      return INITIAL_RAISED;
+    }
+    return parseFloat(stored || '0');
+  }
   function setRaised(v){ localStorage.setItem(STORAGE_KEY, String(v)); }
   function getDonors(){ try{ return JSON.parse(localStorage.getItem(DONORS_KEY) || '[]'); }catch(e){ return []; } }
   function addDonor(amt){
@@ -652,19 +744,77 @@
     document.body.style.overflow = 'hidden';
   }
   function closeModal(){
+    const overlay = document.getElementById('overlay');
+    if(!overlay.classList.contains('open')){
+      document.body.style.overflow = '';
+      return;
+    }
+
+    const amt = pendingAmount || currentAmount();
+    if(amt){
+      document.getElementById('verificationAmount').textContent = fmtINR(amt);
+      document.getElementById('verificationQuestion').style.display = 'block';
+      document.getElementById('verificationSuccess').classList.remove('open');
+      document.getElementById('sharePrompt').classList.remove('open');
+      document.getElementById('shareActions').style.display = 'none';
+      document.getElementById('verificationOverlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    } else {
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  }
+
+  function closeVerification(){
+    document.getElementById('verificationOverlay').classList.remove('open');
     document.getElementById('overlay').classList.remove('open');
     document.body.style.overflow = '';
+    pendingAmount = null;
   }
+
+  function showSharePrompt(){
+    document.getElementById('verificationQuestion').style.display = 'none';
+    document.getElementById('sharePrompt').classList.add('open');
+    document.getElementById('shareActions').style.display = 'grid';
+  }
+
+  function verifyPaidAndShared(){
+    const amt = pendingAmount || currentAmount();
+    if(!amt) return;
+
+    setRaised(getRaised() + amt);
+    addDonor(amt);
+    render();
+
+    document.getElementById('verificationQuestion').style.display = 'none';
+    document.getElementById('sharePrompt').classList.remove('open');
+    document.getElementById('shareActions').style.display = 'none';
+    document.getElementById('verificationSuccess').classList.add('open');
+    showToast('Thank you — donation added to the tracker 🔴');
+  }
+
+  document.addEventListener('keydown', (event) => {
+    if(event.key === 'Escape'){
+      const overlay = document.getElementById('overlay');
+      if(overlay.classList.contains('open')) closeModal();
+      else if(document.getElementById('verificationOverlay').classList.contains('open')) closeVerification();
+    }
+  });
 
   document.querySelectorAll('.chip').forEach(chip => {
     chip.addEventListener('click', () => {
       document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
       chip.classList.add('active');
       document.getElementById('amountInput').value = chip.dataset.amt;
+      pendingAmount = parseInt(chip.dataset.amt, 10);
+      armReturnListener();
     });
   });
   document.getElementById('amountInput').addEventListener('input', () => {
     document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    const amt = currentAmount();
+    pendingAmount = amt;
+    if(amt) armReturnListener();
   });
 
   function currentAmount(){
@@ -685,27 +835,25 @@
 
 
   // ---------- Return-from-app confirmation ----------
+  let returnListenerArmed = false;
   function armReturnListener(){
+    if(returnListenerArmed) return;
+    returnListenerArmed = true;
     const handler = () => {
       if(document.visibilityState === 'visible' && pendingAmount){
-        document.getElementById('confirmAmt').textContent = fmtINR(pendingAmount);
-        document.getElementById('confirmBanner').classList.add('open');
+        document.getElementById('verificationAmount').textContent = fmtINR(pendingAmount);
+        document.getElementById('verificationQuestion').style.display = 'block';
+        document.getElementById('verificationSuccess').classList.remove('open');
+        document.getElementById('sharePrompt').classList.remove('open');
+        document.getElementById('shareActions').style.display = 'none';
+        document.getElementById('overlay').classList.remove('open');
+        document.getElementById('verificationOverlay').classList.add('open');
+        document.body.style.overflow = 'hidden';
         document.removeEventListener('visibilitychange', handler);
+        returnListenerArmed = false;
       }
     };
     document.addEventListener('visibilitychange', handler);
-  }
-
-  function confirmDonation(yes){
-    if(yes && pendingAmount){
-      setRaised(getRaised() + pendingAmount);
-      addDonor(pendingAmount);
-      render();
-      showToast('Thank you — added to the tracker 🔴');
-    }
-    document.getElementById('confirmBanner').classList.remove('open');
-    pendingAmount = null;
-    closeModal();
   }
 
   // ---------- QR ----------
