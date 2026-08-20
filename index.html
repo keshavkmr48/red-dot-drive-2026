@@ -214,6 +214,12 @@
   }
   .qr-block{display:none; text-align:center; margin-top:16px; padding-top:16px; border-top:1px dashed var(--line);}
   .qr-block.open{display:block;}
+  .qr-actions{display:flex; justify-content:center; margin:2px 0 12px;}
+  .qr-download{
+    background:var(--ink); color:var(--paper); border:none; border-radius:8px;
+    padding:8px 14px; font-size:12.5px; font-weight:600; cursor:pointer;
+  }
+  .qr-download:hover{opacity:.9;}
   #qrcode{display:inline-block; margin:0 auto 10px; padding:10px; background:var(--white); border-radius:10px; border:1px solid var(--line);}
   .copy-row{
     display:flex; align-items:center; justify-content:space-between; gap:8px;
@@ -606,9 +612,11 @@
     </div>
 
 
-    <button class="qr-toggle" onclick="toggleQR()">Show QR code ↓</button>
-    <div class="qr-block" id="qrBlock">
+    <div class="qr-block open" id="qrBlock">
       <div id="qrcode"></div>
+      <div class="qr-actions">
+        <button class="qr-download" onclick="downloadQR()">Download QR code</button>
+      </div>
       <div class="copy-row">
         <span class="mono">youthdreamersindia@kotak</span>
         <button onclick="copyUPI()">Copy</button>
@@ -742,6 +750,7 @@
   function openModal(){
     document.getElementById('overlay').classList.add('open');
     document.body.style.overflow = 'hidden';
+    renderQR();
   }
   function closeModal(){
     const overlay = document.getElementById('overlay');
@@ -866,8 +875,30 @@
   }
   function toggleQR(){
     const block = document.getElementById('qrBlock');
-    block.classList.toggle('open');
-    if(block.classList.contains('open')) renderQR();
+    block.classList.add('open');
+    renderQR();
+  }
+
+  function downloadQR(){
+    const canvas = document.querySelector('#qrcode canvas');
+    const img = document.querySelector('#qrcode img');
+    let dataUrl = null;
+
+    if(canvas) dataUrl = canvas.toDataURL('image/png');
+    else if(img) dataUrl = img.src;
+
+    if(!dataUrl){
+      renderQR();
+      setTimeout(downloadQR, 100);
+      return;
+    }
+
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = 'red-dot-drive-2026-upi-qr.png';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
   document.getElementById('amountInput').addEventListener('input', () => {
     if(document.getElementById('qrBlock').classList.contains('open')) renderQR();
