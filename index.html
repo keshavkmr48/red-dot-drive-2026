@@ -563,7 +563,7 @@
     </div>
 
     <div style="margin-top:20px;">
-      <div id="donorsEmpty">No confirmed donations on this device yet — be the first.</div>
+      <div id="donorsEmpty" style="display:none;"></div>
       <div id="donorsList"></div>
     </div>
   </div>
@@ -719,7 +719,7 @@
     const listEl = document.getElementById('donorsList');
     const emptyEl = document.getElementById('donorsEmpty');
     if(donors.length === 0){
-      emptyEl.style.display = 'block';
+      emptyEl.style.display = 'none';
       listEl.innerHTML = '';
     } else {
       emptyEl.style.display = 'none';
