@@ -159,7 +159,10 @@ returns jsonb language sql security definer set search_path='' as $$
  where c.slug='red-dot-drive-2026' group by c.goal_amount;
 $$;
 
-create or replace function public.admin_list_pending_donations()
+-- PostgreSQL cannot change the OUT/RETURNS TABLE row type with CREATE OR REPLACE.
+-- Drop the old zero-argument function first so this migration is rerunnable.
+drop function if exists public.admin_list_pending_donations();
+create function public.admin_list_pending_donations()
 returns table(id uuid,amount numeric,donor_name text,phone text,transaction_id text,transaction_snapshot_path text,transaction_note text,transaction_shared_at timestamptz,created_at timestamptz)
 language sql security definer set search_path='' as $$
  select d.id,d.amount,d.donor_name,d.phone,d.transaction_id,d.transaction_snapshot_path,d.transaction_note,d.transaction_shared_at,d.created_at
