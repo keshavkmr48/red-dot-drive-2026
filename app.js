@@ -88,15 +88,71 @@ function downloadQR(){
 
 function arrangeDonationModal(){
   const modal=document.querySelector('.modal');
-  const qr=document.getElementById('qrBlock');
-  const donorFields=document.querySelector('.donor-fields');
-  if(!modal||!qr||!donorFields)return;
+  if(!modal) return;
+  const title=modal.querySelector('.modal-title');
+  if(title) title.textContent='Fill the details for transaction verification';
 
-  // Put the payment information first so the donor can immediately scan/pay.
-  // Keep the collection fields below the QR and UPI ID.
+  if(modal.dataset.landscapeReady==='1') return;
+
+  const qr=document.getElementById('qrBlock');
+  const donorFields=modal.querySelector('.donor-fields');
+  const amountChips=modal.querySelector('.amount-chips');
+  const amountRow=modal.querySelector('.amount-input-row');
   const callout=modal.querySelector('.modal-callout');
-  if(callout) callout.insertAdjacentElement('afterend',qr);
-  else modal.insertBefore(qr, donorFields);
+  if(!qr || !donorFields) return;
+
+  const layout=document.createElement('div');
+  layout.className='donation-landscape';
+  const payment=document.createElement('div');
+  payment.className='donation-payment-panel';
+  const details=document.createElement('div');
+  details.className='donation-details-panel';
+  layout.append(payment,details);
+
+  payment.appendChild(qr);
+  if(callout) payment.appendChild(callout);
+  details.appendChild(donorFields);
+  if(amountChips) details.appendChild(amountChips);
+  if(amountRow) details.appendChild(amountRow);
+
+  // Move the remaining transaction-proof fields into the details panel while preserving IDs/listeners.
+  const proofIds=['transactionId','transactionSnapshot','donorNote'];
+  proofIds.forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    const wrapper=el.closest('.form-field') || el.parentElement;
+    if(wrapper && wrapper !== donorFields && !wrapper.closest('.donation-details-panel')) details.appendChild(wrapper);
+  });
+
+  // Put the layout immediately after the modal header/subtitle and remove the old flow nodes from normal order.
+  const sub=modal.querySelector('.modal-sub');
+  if(sub) sub.insertAdjacentElement('afterend',layout); else modal.insertBefore(layout,modal.firstChild);
+
+  const style=document.createElement('style');
+  style.textContent=`
+    .modal{width:min(94vw,900px);max-width:900px;max-height:92vh;padding:28px 30px 32px;}
+    .modal-title{font-size:24px;line-height:1.15;max-width:760px;}
+    .modal-sub{margin-bottom:18px;}
+    .donation-landscape{display:grid;grid-template-columns:minmax(280px,.95fr) minmax(320px,1.05fr);gap:24px;align-items:start;}
+    .donation-payment-panel{background:var(--paper-2);border-radius:14px;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;min-height:100%;}
+    .donation-payment-panel .qr-block{border-top:0;margin-top:0;padding-top:0;width:100%;}
+    .donation-payment-panel #qrcode{margin-top:4px;}
+    .donation-details-panel{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:20px;}
+    .donation-details-panel .donor-fields{display:grid;gap:10px;margin-bottom:14px;}
+    .donation-details-panel input,.donation-details-panel select,.donation-details-panel textarea{width:100%;}
+    .donation-details-panel .amount-chips{margin-bottom:12px;}
+    .donation-details-panel .amount-input-row{margin-bottom:14px;}
+    .donation-details-panel .modal-callout{margin-top:14px;}
+    @media(max-width:700px){
+      .modal{width:100%;max-width:100%;border-radius:20px 20px 0 0;padding:24px 18px 28px;}
+      .donation-landscape{grid-template-columns:1fr;gap:16px;}
+      .donation-payment-panel{min-height:0;padding:16px;}
+      .donation-details-panel{padding:16px;}
+      .modal-title{font-size:21px;}
+    }
+  `;
+  modal.appendChild(style);
+  modal.dataset.landscapeReady='1';
 }
 
 function openModal(){ arrangeDonationModal(); $('overlay').classList.add('open'); document.body.style.overflow='hidden'; renderQR(); }
