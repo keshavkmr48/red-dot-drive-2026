@@ -207,11 +207,6 @@
   }
   #amountInput:focus{outline:2px solid var(--red); outline-offset:1px;}
 
-  .app-row{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:16px;}
-  .app-btn{
-    border:1px solid var(--line); background:var(--white); border-radius:10px;
-    padding:10px 6px; font-size:12.5px; font-weight:600; cursor:pointer; text-align:center;
-  }
 
   .qr-toggle{
     display:block; text-align:center; font-size:13px; color:var(--ink-soft);
@@ -283,6 +278,30 @@
   .callout-gold a{color:var(--red-deep); font-weight:600; text-decoration:underline;}
   .callout-icon-gold{background:var(--gold);}
 
+  /* ---------- Scholarship status ---------- */
+  .scholarship-card{
+    background:var(--white); border:1px solid var(--line); border-radius:var(--radius);
+    padding:24px 26px; position:relative; overflow:hidden;
+  }
+  .scholarship-status{
+    display:inline-flex; align-items:center; gap:8px; padding:7px 11px;
+    border-radius:100px; background:var(--paper-2); color:var(--red-deep);
+    font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;
+    margin-bottom:16px;
+  }
+  .scholarship-status::before{
+    content:''; width:7px; height:7px; border-radius:50%; background:var(--gold);
+    box-shadow:0 0 0 3px rgba(185,138,46,0.12);
+  }
+  .scholarship-card h3{
+    font-family:'Fraunces',serif; font-size:22px; margin:0 0 10px; font-weight:600;
+  }
+  .scholarship-card p{
+    font-size:15px; line-height:1.7; color:var(--ink-soft); margin:0 0 14px;
+  }
+  .scholarship-card p:last-child{margin-bottom:0;}
+  .scholarship-card a{color:var(--red-deep); font-weight:600; text-decoration:underline;}
+
   @media (prefers-reduced-motion: reduce){
     *{animation:none !important; transition:none !important;}
   }
@@ -300,7 +319,7 @@
 <header class="hero">
   <div class="wrap">
     <div class="eyebrow">Fundraiser · 20 Aug – 5 Sep 2026</div>
-    <h1 class="headline">Every <em>red dot</em><br>is a girl who stays in school.</h1>
+    <h1 class="headline">Every <em>Kilo Meter on the drive</em><br>is an attempt to keep another girl in school.</h1>
     <p class="sub">
       Driving for a brighter future for every girl child. We're raising ₹5,00,000 to
       fund scholarships for girl students from underprivileged communities in
@@ -341,9 +360,11 @@
   <div class="callout">
     <div class="callout-icon">📸</div>
     <p>
-      <strong>After donating, DM your payment screenshot to Keshav</strong> on
-      Instagram or WhatsApp to have it added to the official tally. Need an
-      <strong>80G tax receipt</strong>? DM Keshav for that too.
+      <strong>Post donation: send your payment screenshot to Keshav</strong> on
+      WhatsApp <a href="https://wa.me/919582621307" target="_blank" rel="noopener">+91-9582621307</a>
+      or Instagram <a href="https://instagram.com/iamfuturistmonk" target="_blank" rel="noopener">@iamfuturistmonk</a>
+      to have it added to the official tally. Need an <strong>80G tax receipt</strong>?
+      DM Keshav for that too.
     </p>
   </div>
 </div>
@@ -368,6 +389,20 @@
         We're documenting the drive publicly — this page's progress bar updates as
         donations come in, and we'll share where every rupee lands once the drive closes.
       </p>
+    </div>
+  </div>
+</section>
+
+<section id="scholarship">
+  <div class="wrap">
+    <div class="section-tag">Scholarship details</div>
+    <h2 class="section-title">The scholarship is being designed</h2>
+    <div class="scholarship-card">
+      <div class="scholarship-status">Design in progress</div>
+      <h3>Details coming soon</h3>
+      <p>The scholarship design, eligibility criteria, selection process and support structure are currently being finalised.</p>
+      <p>Once published, the complete scholarship details and application process will be available on the <strong>YDF portal</strong>, alongside other running scholarships: <a href="https://apply.ydfindia.org" target="_blank" rel="noopener">apply.ydfindia.org</a>.</p>
+      <p>Please check the portal for the latest eligibility, application dates and scholarship-specific requirements once the programme goes live.</p>
     </div>
   </div>
 </section>
@@ -483,8 +518,10 @@
     <div class="upi">UPI ID: <span class="mono">youthdreamersindia@kotak</span></div>
     <div class="organizer">Benefiting Youth Dreamers Foundation · organized by Keshav</div>
     <div class="footer-note">
-      After donating, DM your payment screenshot to <strong>Keshav</strong> on Instagram
-      or WhatsApp to have it added to the official tally. Need an 80G tax receipt?
+      Post donation: send your payment screenshot to <strong>Keshav</strong> on
+      <a href="https://wa.me/919582621307" target="_blank" rel="noopener">WhatsApp +91-9582621307</a>
+      or <a href="https://instagram.com/iamfuturistmonk" target="_blank" rel="noopener">Instagram @iamfuturistmonk</a>
+      to have it added to the official tally. Need an 80G tax receipt?
       DM Keshav for that too.
     </div>
   </div>
@@ -497,12 +534,13 @@
       <div class="modal-title">Choose an amount</div>
       <button class="modal-close" onclick="closeModal()">&times;</button>
     </div>
-    <div class="modal-sub">Opens your UPI app with the amount ready to pay.</div>
+    <div class="modal-sub">Scan the QR code or copy the UPI ID to donate.</div>
 
     <div class="modal-callout">
-      📸 <strong>After paying, DM your screenshot to Keshav</strong> on Instagram or
-      WhatsApp — that's what gets it added to the tally. Need an 80G receipt? Ask in
-      the same DM.
+      📸 <strong>After paying, send your screenshot to Keshav</strong> on
+      <a href="https://wa.me/919582621307" target="_blank" rel="noopener">WhatsApp +91-9582621307</a>
+      or <a href="https://instagram.com/iamfuturistmonk" target="_blank" rel="noopener">Instagram @iamfuturistmonk</a>
+      — that's what gets it added to the tally. Need an 80G receipt? Ask in the same DM.
     </div>
 
     <div class="amount-chips" id="chips">
@@ -516,16 +554,8 @@
       <input type="number" id="amountInput" placeholder="Custom amount" min="1" inputmode="numeric">
     </div>
 
-    <div class="app-row">
-      <button class="app-btn" onclick="pay('generic')">Any UPI app</button>
-      <button class="app-btn" onclick="pay('gpay')">Google Pay</button>
-      <button class="app-btn" onclick="pay('phonepe')">PhonePe</button>
-    </div>
-    <div class="app-row" style="grid-template-columns:1fr;">
-      <button class="app-btn" onclick="pay('paytm')">Paytm</button>
-    </div>
 
-    <button class="qr-toggle" onclick="toggleQR()">Paying from a laptop? Show QR code instead ↓</button>
+    <button class="qr-toggle" onclick="toggleQR()">Show QR code ↓</button>
     <div class="qr-block" id="qrBlock">
       <div id="qrcode"></div>
       <div class="copy-row">
@@ -540,7 +570,10 @@
         <button class="btn-yes" onclick="confirmDonation(true)">Yes, count it</button>
         <button class="btn-no" onclick="confirmDonation(false)">Not yet</button>
       </div>
-      <p class="confirm-followup">One more step: DM your payment screenshot to <strong>Keshav</strong> on Instagram or WhatsApp so it's added to the official tally — and to receive an 80G tax receipt, ask him for that in the same DM.</p>
+      <p class="confirm-followup">One more step: send your payment screenshot to <strong>Keshav</strong> on
+          <a href="https://wa.me/919582621307" target="_blank" rel="noopener">WhatsApp +91-9582621307</a>
+          or <a href="https://instagram.com/iamfuturistmonk" target="_blank" rel="noopener">Instagram @iamfuturistmonk</a>
+          so it's added to the official tally — and to receive an 80G tax receipt, ask him for that in the same message.</p>
     </div>
   </div>
 </div>
@@ -639,63 +672,17 @@
     return (v && v > 0) ? Math.round(v) : null;
   }
 
-  const PSP_PACKAGE = {
-    gpay:    'com.google.android.apps.nbu.paisa.user',
-    phonepe: 'com.phonepe.app',
-    paytm:   'net.one97.paytm'
-  };
   function isAndroid(){ return /Android/i.test(navigator.userAgent); }
   function isInAppBrowser(){ return /Instagram|FBAN|FBAV|FB_IAB|Line\//i.test(navigator.userAgent); }
 
   // Plain upi:// URI — for QR codes and iOS. Any UPI app scanning a QR
   // expects this exact form; intent:// syntax is Android-browser-only.
   function buildUpiUriPlain(amt){
-    const params = `pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(PAYEE)}&am=${amt}&cu=INR&tn=${encodeURIComponent(NOTE)}&mc=0000`;
+    const params = `pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(PAYEE)}&am=${amt}&cu=INR&tn=${encodeURIComponent(NOTE)}`;
     return `upi://pay?${params}`;
   }
 
-  function buildUpiUri(scheme, amt){
-    const params = `pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(PAYEE)}&am=${amt}&cu=INR&tn=${encodeURIComponent(NOTE)}&mc=0000`;
 
-    if(isAndroid()){
-      // Android: route through intent:// so the OS resolves it via its
-      // intent-filter system instead of the browser handing off a bare
-      // custom-scheme link. This is what reliably opens the *pay* screen —
-      // a raw tez:// / upi:// link handed to a WebView (e.g. Instagram's
-      // in-app browser) often gets swallowed and the app cold-launches to
-      // its own home/onboarding screen instead, which is what "asks to add
-      // a bank account" usually is.
-      const pkg = PSP_PACKAGE[scheme];
-      const pkgAttr = pkg ? `package=${pkg};` : '';
-      const fallback = encodeURIComponent(location.href);
-      return `intent://pay?${params}#Intent;scheme=upi;${pkgAttr}S.browser_fallback_url=${fallback};end`;
-    }
-
-    // iOS has no intent:// equivalent — custom schemes are the only route.
-    switch(scheme){
-      case 'gpay':    return `gpay://upi/pay?${params}`;
-      case 'phonepe': return `phonepe://pay?${params}`;
-      case 'paytm':   return `paytmmp://pay?${params}`;
-      default:        return `upi://pay?${params}`;
-    }
-  }
-
-  function pay(scheme){
-    const amt = currentAmount();
-    if(!amt){
-      showToast('Enter or select an amount first');
-      return;
-    }
-    if(isInAppBrowser()){
-      showToast('Tap the ⋯ menu and choose "Open in browser" first');
-    }
-    pendingAmount = amt;
-    const uri = buildUpiUri(scheme, amt);
-    window.location.href = uri;
-    // Regenerate QR for this amount too, in case the app didn't open
-    renderQR(amt);
-    armReturnListener();
-  }
 
   // ---------- Return-from-app confirmation ----------
   function armReturnListener(){
@@ -738,8 +725,28 @@
     if(document.getElementById('qrBlock').classList.contains('open')) renderQR();
   });
 
-  function copyUPI(){
-    navigator.clipboard.writeText(UPI_ID).then(() => showToast('UPI ID copied'));
+  async function copyUPI(){
+    const text = UPI_ID;
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        ta.setSelectionRange(0, ta.value.length);
+        const copied = document.execCommand('copy');
+        document.body.removeChild(ta);
+        if (!copied) throw new Error('Copy command failed');
+      }
+      showToast('UPI ID copied');
+    } catch (err) {
+      showToast('Could not copy — please copy the UPI ID manually');
+    }
   }
 
   // ---------- Toast ----------
@@ -752,16 +759,8 @@
     toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
   }
 
-  function initInAppWarning(){
-    if(!isInAppBrowser()) return;
-    const bar = document.createElement('div');
-    bar.style.cssText = 'position:sticky;top:0;z-index:50;background:#211C18;color:#FAF6F0;font-size:12.5px;text-align:center;padding:9px 16px;line-height:1.5;';
-    bar.innerHTML = 'You\'re inside an in-app browser — UPI apps often won\'t open properly from here. Tap <strong>⋯</strong> above and choose <strong>“Open in browser”</strong> for a smoother payment.';
-    document.body.prepend(bar);
-  }
 
   render();
-  initInAppWarning();
   setInterval(render, 60000);
 </script>
 </body>
