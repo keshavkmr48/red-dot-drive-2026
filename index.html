@@ -565,6 +565,14 @@
     <div style="margin-top:20px;">
       <div id="donorsEmpty" style="display:none;"></div>
       <div id="donorsList"></div>
+
+      <div id="donationStatusCard" class="progress-card" style="display:none;margin-top:20px;">
+        <div class="section-tag">Donation status</div>
+        <div class="raised-amt" id="donationStatusTitle" style="font-size:22px;">Donation verification in progress</div>
+        <div class="tracker-note" id="donationStatusText" style="border-top:none;padding-top:6px;margin-top:0;">
+          Your transaction details have been submitted. The donation will enter the public tracker after verification.
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -598,6 +606,13 @@
       <a href="https://wa.me/919582621307" target="_blank" rel="noopener">WhatsApp +91-9582621307</a>
       or <a href="https://instagram.com/iamfuturistmonk" target="_blank" rel="noopener">Instagram @iamfuturistmonk</a>
       — that's what gets it added to the tally. Need an 80G receipt? Ask in the same DM.
+    </div>
+
+    <div class="donor-fields" style="display:grid;gap:10px;margin-bottom:16px;">
+      <input id="donorName" type="text" placeholder="Your name (optional)" autocomplete="name"
+        style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--line);font-size:14px;background:var(--white);color:var(--ink);">
+      <input id="donorNote" type="text" placeholder="Transaction reference / note (optional)"
+        style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--line);font-size:14px;background:var(--white);color:var(--ink);">
     </div>
 
     <div class="amount-chips" id="chips">
@@ -672,328 +687,7 @@
 
 <div class="toast" id="toast"></div>
 
-<script>
-  // ---------- Config ----------
-  const UPI_ID   = 'youthdreamersindia@kotak';
-  const PAYEE    = 'Youth Dreamers Foundation';
-  const NOTE     = 'Red Dot Drive 2026';
-  const GOAL     = 500000;
-  const DEADLINE = new Date('2026-09-05T23:59:59+05:30');
-  const STORAGE_KEY = 'reddotdrive2026_raised_v1';
-  const INITIAL_RAISED = 25003;
-  const DONORS_KEY   = 'reddotdrive2026_donors_v1';
-
-  // ---------- Storage helpers ----------
-  function getRaised(){
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if(stored === null){
-      localStorage.setItem(STORAGE_KEY, String(INITIAL_RAISED));
-      return INITIAL_RAISED;
-    }
-    return parseFloat(stored || '0');
-  }
-  function setRaised(v){ localStorage.setItem(STORAGE_KEY, String(v)); }
-  function getDonors(){ try{ return JSON.parse(localStorage.getItem(DONORS_KEY) || '[]'); }catch(e){ return []; } }
-  function addDonor(amt){
-    const list = getDonors();
-    list.unshift({ amt, ts: Date.now() });
-    localStorage.setItem(DONORS_KEY, JSON.stringify(list.slice(0,20)));
-  }
-
-  function fmtINR(n){
-    return '₹' + Math.round(n).toLocaleString('en-IN');
-  }
-
-  function render(){
-    const raised = getRaised();
-    const pct = Math.min(100, (raised / GOAL) * 100);
-    document.getElementById('dotFill').style.height = pct + '%';
-    document.getElementById('dotPct').textContent = Math.round(pct) + '%';
-    document.getElementById('statRaised').textContent = fmtINR(raised);
-    document.getElementById('cardRaised').textContent = fmtINR(raised);
-    document.getElementById('barFill').style.width = pct + '%';
-    document.getElementById('pctText').textContent = Math.round(pct) + '% funded';
-    document.getElementById('remainingText').textContent = fmtINR(Math.max(0, GOAL - raised)) + ' to go';
-
-    const donors = getDonors();
-    const listEl = document.getElementById('donorsList');
-    const emptyEl = document.getElementById('donorsEmpty');
-    if(donors.length === 0){
-      emptyEl.style.display = 'none';
-      listEl.innerHTML = '';
-    } else {
-      emptyEl.style.display = 'none';
-      listEl.innerHTML = donors.map(d => {
-        const date = new Date(d.ts);
-        const dstr = date.toLocaleDateString('en-IN', {day:'numeric', month:'short'});
-        return `<div class="donor-row"><span>Confirmed donation — ${dstr}</span><span class="donor-amt">${fmtINR(d.amt)}</span></div>`;
-      }).join('');
-    }
-
-    // countdown
-    const now = new Date();
-    const diff = DEADLINE - now;
-    const days = Math.max(0, Math.floor(diff / 86400000));
-    const hours = Math.max(0, Math.floor((diff % 86400000) / 3600000));
-    document.getElementById('statDays').textContent = days;
-    document.getElementById('countdown').innerHTML = `
-      <div class="cd-box"><div class="cd-num">${days}</div><div class="cd-label">Days</div></div>
-      <div class="cd-box"><div class="cd-num">${hours}</div><div class="cd-label">Hours</div></div>
-      <div class="cd-box"><div class="cd-num mono">5 Sep</div><div class="cd-label">Closes</div></div>
-    `;
-  }
-
-  // ---------- Modal ----------
-  let selectedAmount = null;
-  let pendingAmount = null;
-
-  function openModal(){
-    document.getElementById('overlay').classList.add('open');
-    document.body.style.overflow = 'hidden';
-    renderQR();
-  }
-  function closeModal(){
-    const overlay = document.getElementById('overlay');
-    if(!overlay.classList.contains('open')){
-      document.body.style.overflow = '';
-      return;
-    }
-
-    const amt = pendingAmount || currentAmount();
-    if(amt){
-      document.getElementById('verificationAmount').textContent = fmtINR(amt);
-      document.getElementById('verificationQuestion').style.display = 'block';
-      document.getElementById('verificationSuccess').classList.remove('open');
-      document.getElementById('sharePrompt').classList.remove('open');
-      document.getElementById('shareActions').style.display = 'none';
-      document.getElementById('verificationOverlay').classList.add('open');
-      document.body.style.overflow = 'hidden';
-    } else {
-      overlay.classList.remove('open');
-      document.body.style.overflow = '';
-    }
-  }
-
-  function closeVerification(){
-    document.getElementById('verificationOverlay').classList.remove('open');
-    document.getElementById('overlay').classList.remove('open');
-    document.body.style.overflow = '';
-    pendingAmount = null;
-  }
-
-  function showSharePrompt(){
-    document.getElementById('verificationQuestion').style.display = 'none';
-    document.getElementById('sharePrompt').classList.add('open');
-    document.getElementById('shareActions').style.display = 'grid';
-  }
-
-  function verifyPaidAndShared(){
-    const amt = pendingAmount || currentAmount();
-    if(!amt) return;
-
-    setRaised(getRaised() + amt);
-    addDonor(amt);
-    render();
-
-    document.getElementById('verificationQuestion').style.display = 'none';
-    document.getElementById('sharePrompt').classList.remove('open');
-    document.getElementById('shareActions').style.display = 'none';
-    document.getElementById('verificationSuccess').classList.add('open');
-    showToast('Thank you — donation added to the tracker 🔴');
-  }
-
-  document.addEventListener('keydown', (event) => {
-    if(event.key === 'Escape'){
-      const overlay = document.getElementById('overlay');
-      if(overlay.classList.contains('open')) closeModal();
-      else if(document.getElementById('verificationOverlay').classList.contains('open')) closeVerification();
-    }
-  });
-
-  document.querySelectorAll('.chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-      chip.classList.add('active');
-      document.getElementById('amountInput').value = chip.dataset.amt;
-      pendingAmount = parseInt(chip.dataset.amt, 10);
-      armReturnListener();
-    });
-  });
-  document.getElementById('amountInput').addEventListener('input', () => {
-    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-    const amt = currentAmount();
-    pendingAmount = amt;
-    if(amt) armReturnListener();
-  });
-
-  function currentAmount(){
-    const v = parseFloat(document.getElementById('amountInput').value);
-    return (v && v > 0) ? Math.round(v) : null;
-  }
-
-  function isAndroid(){ return /Android/i.test(navigator.userAgent); }
-  function isInAppBrowser(){ return /Instagram|FBAN|FBAV|FB_IAB|Line\//i.test(navigator.userAgent); }
-
-  // Plain upi:// URI — for QR codes and iOS. Any UPI app scanning a QR
-  // expects this exact form; intent:// syntax is Android-browser-only.
-  function buildUpiUriPlain(amt){
-    const params = `pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(PAYEE)}&am=${amt}&cu=INR&tn=${encodeURIComponent(NOTE)}`;
-    return `upi://pay?${params}`;
-  }
-
-
-
-  // ---------- Return-from-app confirmation ----------
-  let returnListenerArmed = false;
-  function armReturnListener(){
-    if(returnListenerArmed) return;
-    returnListenerArmed = true;
-    const handler = () => {
-      if(document.visibilityState === 'visible' && pendingAmount){
-        document.getElementById('verificationAmount').textContent = fmtINR(pendingAmount);
-        document.getElementById('verificationQuestion').style.display = 'block';
-        document.getElementById('verificationSuccess').classList.remove('open');
-        document.getElementById('sharePrompt').classList.remove('open');
-        document.getElementById('shareActions').style.display = 'none';
-        document.getElementById('overlay').classList.remove('open');
-        document.getElementById('verificationOverlay').classList.add('open');
-        document.body.style.overflow = 'hidden';
-        document.removeEventListener('visibilitychange', handler);
-        returnListenerArmed = false;
-      }
-    };
-    document.addEventListener('visibilitychange', handler);
-  }
-
-  // ---------- QR ----------
-  let qrInstance = null;
-  function renderQR(amt){
-    const el = document.getElementById('qrcode');
-    el.innerHTML = '';
-    const uri = buildUpiUriPlain(amt || currentAmount() || 1);
-    qrInstance = new QRCode(el, {
-      text: uri,
-      width: 168,
-      height: 168,
-      colorDark: '#211C18',
-      colorLight: '#ffffff',
-      correctLevel: QRCode.CorrectLevel.M
-    });
-  }
-  function toggleQR(){
-    const block = document.getElementById('qrBlock');
-    block.classList.add('open');
-    renderQR();
-  }
-
-  function downloadQR(){
-    const amt = currentAmount() || pendingAmount || 1;
-    const uri = buildUpiUriPlain(amt);
-
-    // Download the complete payment panel as one PNG:
-    // QR code + UPI ID + campaign name, with generous margins.
-    const canvas = document.createElement('canvas');
-    const size = 1200;
-    const qrSize = 760;
-    canvas.width = size;
-    canvas.height = 1050;
-
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    const holder = document.createElement('div');
-    holder.style.position = 'fixed';
-    holder.style.left = '-10000px';
-    holder.style.top = '0';
-    holder.style.width = qrSize + 'px';
-    holder.style.height = qrSize + 'px';
-    holder.style.background = '#ffffff';
-    document.body.appendChild(holder);
-
-    new QRCode(holder, {
-      text: uri,
-      width: qrSize,
-      height: qrSize,
-      colorDark: '#000000',
-      colorLight: '#ffffff',
-      correctLevel: QRCode.CorrectLevel.M
-    });
-
-    setTimeout(() => {
-      const qrCanvas = holder.querySelector('canvas');
-      const qrImg = holder.querySelector('img');
-
-      if(qrCanvas){
-        ctx.drawImage(qrCanvas, (size - qrSize) / 2, 45, qrSize, qrSize);
-      } else if(qrImg){
-        ctx.drawImage(qrImg, (size - qrSize) / 2, 45, qrSize, qrSize);
-      }
-
-      ctx.textAlign = 'center';
-      ctx.fillStyle = '#211C18';
-      ctx.font = '600 34px Inter, Arial, sans-serif';
-      ctx.fillText('UPI ID', size / 2, 875);
-
-      ctx.font = '500 38px "IBM Plex Mono", monospace';
-      ctx.fillText(UPI_ID, size / 2, 925);
-
-      ctx.fillStyle = '#5B5148';
-      ctx.font = '400 27px Inter, Arial, sans-serif';
-      ctx.fillText('Red Dot Drive 2026', size / 2, 985);
-
-      const dataUrl = canvas.toDataURL('image/png');
-      const link = document.createElement('a');
-      link.href = dataUrl;
-      link.download = `red-dot-drive-2026-payment-${amt}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      document.body.removeChild(holder);
-    }, 200);
-  }
-  document.getElementById('amountInput').addEventListener('input', () => {
-    if(document.getElementById('qrBlock').classList.contains('open')) renderQR();
-  });
-
-  async function copyUPI(){
-    const text = UPI_ID;
-    try {
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(text);
-      } else {
-        const ta = document.createElement('textarea');
-        ta.value = text;
-        ta.setAttribute('readonly', '');
-        ta.style.position = 'fixed';
-        ta.style.left = '-9999px';
-        document.body.appendChild(ta);
-        ta.select();
-        ta.setSelectionRange(0, ta.value.length);
-        const copied = document.execCommand('copy');
-        document.body.removeChild(ta);
-        if (!copied) throw new Error('Copy command failed');
-      }
-      showToast('UPI ID copied');
-    } catch (err) {
-      showToast('Could not copy — please copy the UPI ID manually');
-    }
-  }
-
-  // ---------- Toast ----------
-  let toastTimer;
-  function showToast(msg){
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
-  }
-
-
-  render();
-  setInterval(render, 60000);
-</script>
+<script src="/config.js"></script>
+<script type="module" src="/app.js"></script>
 </body>
 </html>
