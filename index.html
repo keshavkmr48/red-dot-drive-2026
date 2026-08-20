@@ -890,45 +890,68 @@
     const amt = currentAmount() || pendingAmount || 1;
     const uri = buildUpiUriPlain(amt);
 
-    // Generate a separate high-resolution QR for download. Do not upscale
-    // the 168px display QR, as interpolation can make some UPI scanners fail.
+    // Download the complete payment panel as one PNG:
+    // QR code + UPI ID + campaign name, with generous margins.
+    const canvas = document.createElement('canvas');
+    const size = 1200;
+    const qrSize = 760;
+    canvas.width = size;
+    canvas.height = 1050;
+
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
     const holder = document.createElement('div');
     holder.style.position = 'fixed';
     holder.style.left = '-10000px';
     holder.style.top = '0';
-    holder.style.width = '1024px';
-    holder.style.height = '1024px';
+    holder.style.width = qrSize + 'px';
+    holder.style.height = qrSize + 'px';
     holder.style.background = '#ffffff';
     document.body.appendChild(holder);
 
-    const downloadQRInstance = new QRCode(holder, {
+    new QRCode(holder, {
       text: uri,
-      width: 1024,
-      height: 1024,
+      width: qrSize,
+      height: qrSize,
       colorDark: '#000000',
       colorLight: '#ffffff',
       correctLevel: QRCode.CorrectLevel.M
     });
 
     setTimeout(() => {
-      const canvas = holder.querySelector('canvas');
-      const img = holder.querySelector('img');
-      let dataUrl = null;
+      const qrCanvas = holder.querySelector('canvas');
+      const qrImg = holder.querySelector('img');
 
-      if(canvas) dataUrl = canvas.toDataURL('image/png');
-      else if(img) dataUrl = img.src;
-
-      if(dataUrl){
-        const link = document.createElement('a');
-        link.href = dataUrl;
-        link.download = `red-dot-drive-2026-upi-${amt}.png`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+      if(qrCanvas){
+        ctx.drawImage(qrCanvas, (size - qrSize) / 2, 45, qrSize, qrSize);
+      } else if(qrImg){
+        ctx.drawImage(qrImg, (size - qrSize) / 2, 45, qrSize, qrSize);
       }
 
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#211C18';
+      ctx.font = '600 34px Inter, Arial, sans-serif';
+      ctx.fillText('UPI ID', size / 2, 875);
+
+      ctx.font = '500 38px "IBM Plex Mono", monospace';
+      ctx.fillText(UPI_ID, size / 2, 925);
+
+      ctx.fillStyle = '#5B5148';
+      ctx.font = '400 27px Inter, Arial, sans-serif';
+      ctx.fillText('Red Dot Drive 2026', size / 2, 985);
+
+      const dataUrl = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = `red-dot-drive-2026-payment-${amt}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
       document.body.removeChild(holder);
-    }, 150);
+    }, 200);
   }
   document.getElementById('amountInput').addEventListener('input', () => {
     if(document.getElementById('qrBlock').classList.contains('open')) renderQR();
