@@ -220,7 +220,7 @@
     padding:8px 14px; font-size:12.5px; font-weight:600; cursor:pointer;
   }
   .qr-download:hover{opacity:.9;}
-  #qrcode{display:inline-block; margin:0 auto 10px; padding:10px; background:var(--white); border-radius:10px; border:1px solid var(--line);}
+  #qrcode{display:inline-block; margin:0 auto 10px; padding:16px; background:#fff; border-radius:10px; border:1px solid var(--line);}
   .copy-row{
     display:flex; align-items:center; justify-content:space-between; gap:8px;
     background:var(--paper-2); border-radius:10px; padding:10px 12px; font-size:13px; margin-top:8px;
@@ -871,7 +871,14 @@
     const el = document.getElementById('qrcode');
     el.innerHTML = '';
     const uri = buildUpiUriPlain(amt || currentAmount() || 1);
-    qrInstance = new QRCode(el, { text: uri, width: 168, height: 168, colorDark: '#211C18', colorLight: '#ffffff' });
+    qrInstance = new QRCode(el, {
+      text: uri,
+      width: 168,
+      height: 168,
+      colorDark: '#211C18',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
   }
   function toggleQR(){
     const block = document.getElementById('qrBlock');
@@ -880,25 +887,48 @@
   }
 
   function downloadQR(){
-    const canvas = document.querySelector('#qrcode canvas');
-    const img = document.querySelector('#qrcode img');
-    let dataUrl = null;
+    const amt = currentAmount() || pendingAmount || 1;
+    const uri = buildUpiUriPlain(amt);
 
-    if(canvas) dataUrl = canvas.toDataURL('image/png');
-    else if(img) dataUrl = img.src;
+    // Generate a separate high-resolution QR for download. Do not upscale
+    // the 168px display QR, as interpolation can make some UPI scanners fail.
+    const holder = document.createElement('div');
+    holder.style.position = 'fixed';
+    holder.style.left = '-10000px';
+    holder.style.top = '0';
+    holder.style.width = '1024px';
+    holder.style.height = '1024px';
+    holder.style.background = '#ffffff';
+    document.body.appendChild(holder);
 
-    if(!dataUrl){
-      renderQR();
-      setTimeout(downloadQR, 100);
-      return;
-    }
+    const downloadQRInstance = new QRCode(holder, {
+      text: uri,
+      width: 1024,
+      height: 1024,
+      colorDark: '#000000',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
 
-    const link = document.createElement('a');
-    link.href = dataUrl;
-    link.download = 'red-dot-drive-2026-upi-qr.png';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    setTimeout(() => {
+      const canvas = holder.querySelector('canvas');
+      const img = holder.querySelector('img');
+      let dataUrl = null;
+
+      if(canvas) dataUrl = canvas.toDataURL('image/png');
+      else if(img) dataUrl = img.src;
+
+      if(dataUrl){
+        const link = document.createElement('a');
+        link.href = dataUrl;
+        link.download = `red-dot-drive-2026-upi-${amt}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      document.body.removeChild(holder);
+    }, 150);
   }
   document.getElementById('amountInput').addEventListener('input', () => {
     if(document.getElementById('qrBlock').classList.contains('open')) renderQR();
