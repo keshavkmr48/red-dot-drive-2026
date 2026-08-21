@@ -31,7 +31,7 @@ async function renderDonationStatus(){
   if(!pendingDonationId)return; const d=await getDonationStatus(); if(!d)return;
   $('donationStatusCard').style.display='block';
   if(d.status==='confirmed'){ $('donationStatusTitle').textContent='Donation verified ✓'; $('donationStatusText').textContent=`${fmtINR(d.amount)} has been added to the public Red Dot Drive tracker.`; localStorage.removeItem('reddot_pending_donation_id'); pendingDonationId=null; pendingAmount=null; await loadProgress(); }
-  else if(d.status==='rejected'){ $('donationStatusTitle').textContent='Donation could not be verified'; $('donationStatusText').textContent='Please contact Keshav on WhatsApp with your transaction details if you believe this is incorrect.'; }
+  else if(d.status==='rejected'){ $('donationStatusTitle').textContent='Donation could not be verified'; $('donationStatusText').textContent='Please contact Keshav or Shilpi for help with your donation verification.'; }
   else { $('donationStatusTitle').textContent='Donation verification in progress'; $('donationStatusText').textContent=`We have your ${fmtINR(d.amount)} donation submission. It will be added to the public tracker after verification.`; }
 }
 
@@ -44,7 +44,7 @@ function validateDonorForm(){
   if(!name) throw new Error('Please enter your name.');
   if(!phone || phone.replace(/\D/g,'').length < 10) throw new Error('Please enter a valid phone number.');
   if(!amount) throw new Error('Please select or enter a donation amount.');
-  if(!txid && !file) throw new Error('Please provide either the transaction ID / UTR or a transaction snapshot.');
+  if(!file) throw new Error('Please upload the transaction snapshot.');
   if(file){
     if(!file.type.startsWith('image/')) throw new Error('Transaction snapshot must be an image.');
     if(file.size > MAX_SNAPSHOT_SIZE) throw new Error('Transaction snapshot must be 5 MB or smaller.');
@@ -68,15 +68,13 @@ async function createPendingDonation(){
     p_amount:f.amount,
     p_donor_name:f.name,
     p_phone:f.phone,
-    p_transaction_id:f.txid||null,
+    p_transaction_id:null,
     p_snapshot_path:snapshotPath,
     p_transaction_note:$('donorNote')?.value.trim()||null
   });
   if(error) throw error;
   pendingDonationId=data.id; pendingAmount=f.amount; localStorage.setItem('reddot_pending_donation_id',pendingDonationId); return data;
 }
-
-async function markTransactionShared(){ if(!pendingDonationId)return; const {error}=await supabase.rpc('mark_transaction_shared',{p_donation_id:pendingDonationId}); if(error)throw error; }
 
 function renderQR(amt){ const el=$('qrcode'); if(!el||typeof QRCode==='undefined')return; el.innerHTML=''; new QRCode(el,{text:buildUpiUriPlain(amt||currentAmount()||1),width:168,height:168,colorDark:'#211C18',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M}); }
 function downloadQR(){
@@ -90,9 +88,8 @@ function donorFormReady(){
   const name=$('donorName')?.value.trim();
   const phone=$('donorPhone')?.value.trim();
   const amount=currentAmount();
-  const txid=$('transactionId')?.value.trim();
   const file=$('transactionSnapshot')?.files?.[0];
-  return Boolean(name && phone && phone.replace(/\D/g,'').length >= 10 && amount && (txid || file));
+  return Boolean(name && phone && phone.replace(/\D/g,'').length >= 10 && amount && file);
 }
 
 function updateSubmitVerificationButton(){
@@ -236,13 +233,14 @@ function closeVerification(){ $('verificationOverlay').classList.remove('open');
 
 async function startVerification(){
   try{
-    validateDonorForm(); await createPendingDonation(); await markTransactionShared();
-    const msg=`Red Dot Drive 2026 — transaction details\nDonation ID: ${pendingDonationId}\nName: ${$('donorName').value.trim()}\nPhone: ${$('donorPhone').value.trim()}\nAmount: ${fmtINR(pendingAmount)}\nTransaction ID/UTR: ${$('transactionId').value.trim()||'Transaction snapshot uploaded'}\n\nPlease verify the transaction.`;
-    window.open(`https://wa.me/919582621307?text=${encodeURIComponent(msg)}`,'_blank','noopener');
-    $('verificationQuestion').style.display='none'; $('sharePrompt').classList.add('open'); $('shareActions').style.display='grid'; closeVerification(); await renderDonationStatus(); showToast('Donation verification in progress.');
+    validateDonorForm();
+    await createPendingDonation();
+    closeVerification();
+    await renderDonationStatus();
+    showToast('Donation verification in progress.');
   } catch(e){ console.error(e); showToast(e.message||'Unable to submit donation.'); }
 }
-async function confirmSharedAndClose(){ try{ await markTransactionShared(); closeVerification(); $('overlay').classList.remove('open'); document.body.style.overflow=''; await renderDonationStatus(); showToast('Donation verification in progress.'); }catch(e){showToast(e.message||'Unable to update donation status.');} }
+async function confirmSharedAndClose(){ try{ closeVerification(); $('overlay').classList.remove('open'); document.body.style.overflow=''; await renderDonationStatus(); showToast('Donation verification in progress.'); }catch(e){showToast(e.message||'Unable to update donation status.');} }
 function selectAmount(amount){ document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active')); const c=[...document.querySelectorAll('.chip')].find(x=>Number(x.dataset.amt)===Number(amount)); if(c)c.classList.add('active'); $('amountInput').value=amount; pendingAmount=Number(amount); renderQR(pendingAmount); updateSubmitVerificationButton(); }
 async function copyUPI(){ try{await navigator.clipboard.writeText(UPI_ID); showToast('UPI ID copied');}catch{showToast(`UPI ID: ${UPI_ID}`);} }
 
