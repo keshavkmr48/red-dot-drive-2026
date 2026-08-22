@@ -4,156 +4,25 @@
 window.__SUPABASE_URL__ = 'https://afpeiuenhrvclmabadje.supabase.co';
 window.__SUPABASE_PUBLISHABLE_KEY__ = 'sb_publishable_ay6SofsXxPxSjZZBb-XOXg_nRe4KaWZ';
 
-// Opening-view layout: keep the campaign message, donation progress and key journey
-// features visible together without changing the existing data flow.
 (function setupOpeningView(){
   function init(){
-    const hero = document.querySelector('.hero');
-    const heroWrap = hero?.querySelector('.wrap');
-    const bowl = document.querySelector('.dot-wrap');
-    const bowlCaption = document.querySelector('.dot-caption');
-    const stats = document.querySelector('.stats');
-    const liveCard = document.querySelector('#live-drive .live-drive-card');
-    const mentorsSection = document.querySelector('#mentors');
-    if(!hero || !heroWrap || !bowl || !bowlCaption || !stats || !liveCard || !mentorsSection) return;
-
-    const style = document.createElement('style');
-    style.id = 'opening-view-layout';
-    style.textContent = `
-      .hero{padding:24px 0 24px;min-height:calc(100svh - 67px);display:flex;align-items:flex-start}
-      .hero>.wrap{width:100%;max-width:1180px;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(390px,.85fr);grid-template-rows:auto auto;column-gap:56px;row-gap:18px;align-items:center}
-      .hero .eyebrow{grid-column:1;margin:4px 0 10px;justify-self:start}
-      h1.headline{grid-column:1;font-size:clamp(40px,4.5vw,62px);line-height:1.02;max-width:760px;margin:0 0 10px;text-align:left}
-      .hero .sub{grid-column:1;font-size:15.5px;line-height:1.48;max-width:650px;margin:0 0 12px;text-align:left}
-      .hero-actions{grid-column:1;display:flex;justify-content:flex-start;margin:0;gap:10px}
-      .hero-actions .btn-primary{padding:11px 20px;font-size:14px}
-      .hero-actions .btn-ghost{padding:10px 19px;font-size:14px;text-decoration:none}
-
-      .hero-stats-panel{grid-column:2;grid-row:1 / span 2;display:flex;flex-direction:column;align-items:stretch;justify-content:center;min-width:0}
-      .hero-stats-panel .stats{margin:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);width:100%;grid-template-columns:repeat(3,1fr)}
-      .hero-stats-panel .stat{padding:18px 8px}
-      .hero-stats-panel .stat-num{font-size:23px}
-      .hero-stats-panel .stat-label{font-size:10px}
-      .hero-bowl-wrap{display:flex;align-items:center;justify-content:center;gap:20px;padding:16px 0 0}
-      .hero-bowl{display:flex;flex-direction:column;align-items:center;justify-content:center}
-      .hero-bowl .dot-wrap{width:170px;height:170px;margin:0}
-      .hero-bowl .dot-pct{font-size:29px}
-      .hero-bowl .dot-caption{font-size:10.5px;margin-top:8px;margin-bottom:0}
-
-      .hero-feature-tiles{grid-column:1 / -1;display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:2px}
-      .hero-live,.hero-mentors{min-width:0}
-      .hero-live .live-drive-card,.hero-mentor-card{width:100%;height:100%;margin:0;min-height:156px;padding:20px 22px;border-radius:14px}
-      .hero-live .live-drive-card{display:flex;align-items:center}
-      .hero-live .live-drive-card h3,.hero-mentor-card h3{font-size:24px;line-height:1.08;margin:0 0 7px}
-      .hero-live .live-drive-card p,.hero-mentor-card p{font-size:12.5px;line-height:1.45;margin:0 0 11px}
-      .hero-live .live-drive-btn{padding:9px 15px;font-size:12.5px}
-      .hero-live .live-drive-note{font-size:9.5px!important;margin-top:7px!important}
-      .hero-mentor-card{background:var(--white);border:1px solid var(--line);color:var(--ink);position:relative;overflow:hidden}
-      .hero-mentor-card::after{content:'✦';position:absolute;right:20px;top:14px;color:var(--gold);font-size:28px;opacity:.55}
-      .hero-mentor-badge{display:inline-flex;align-items:center;gap:7px;font-size:10px;letter-spacing:.11em;text-transform:uppercase;font-weight:700;color:var(--gold);margin-bottom:10px}
-      .hero-mentor-badge::before{content:'🤝';font-size:13px}
-      .hero-mentor-card h3{font-family:'Fraunces',serif;color:var(--ink)}
-      .hero-mentor-card p{color:var(--ink-soft);max-width:430px}
-      .hero-mentor-btn{display:inline-flex;align-items:center;background:var(--ink);color:var(--paper);text-decoration:none;padding:9px 15px;border-radius:100px;font-weight:700;font-size:12.5px}
-
-      /* Keep the full original sections intact below the opening view. */
-      #live-drive{display:none}
-      #mentors{display:block}
-      .hero+.callout-wrap{margin-top:0}
-
-      @media(max-width:800px){
-        .hero{padding:18px 0 20px;min-height:calc(100svh - 60px)}
-        .hero>.wrap{display:flex;flex-direction:column;gap:0;padding-left:18px;padding-right:18px;max-width:600px}
-        .hero .eyebrow{align-self:center;margin:2px 0 10px;text-align:center}
-        h1.headline{font-size:clamp(34px,8.8vw,46px);line-height:1.02;max-width:560px;text-align:center;margin-bottom:10px}
-        .hero .sub{font-size:13.5px;line-height:1.46;max-width:520px;text-align:center;margin-bottom:11px}
-        .hero-actions{display:flex;justify-content:center;margin:0 0 12px;gap:8px}
-        .hero-actions .btn-primary,.hero-actions .btn-ghost{padding:9px 15px;font-size:12.5px}
-        .hero-stats-panel{width:100%;display:flex;flex-direction:column}
-        .hero-stats-panel .stats{width:100%;margin:0}
-        .hero-stats-panel .stat{padding:12px 5px}
-        .hero-stats-panel .stat-num{font-size:20px}
-        .hero-stats-panel .stat-label{font-size:9px;margin-top:4px}
-        .hero-bowl-wrap{padding:9px 0 11px}
-        .hero-bowl .dot-wrap{width:112px;height:112px}
-        .hero-bowl .dot-pct{font-size:23px}
-        .hero-bowl .dot-caption{font-size:9px;margin-top:5px}
-        .hero-feature-tiles{width:100%;grid-template-columns:1fr 1fr;gap:10px;margin-top:0}
-        .hero-live .live-drive-card,.hero-mentor-card{min-height:132px;padding:14px 15px}
-        .hero-live .live-drive-card h3,.hero-mentor-card h3{font-size:19px;margin-bottom:5px}
-        .hero-live .live-drive-card p,.hero-mentor-card p{font-size:10.8px;line-height:1.38;margin-bottom:8px}
-        .hero-live .live-drive-btn,.hero-mentor-btn{padding:7px 10px;font-size:10.5px}
-        .hero-live .live-drive-note{display:none}
-        .hero-mentor-badge{font-size:8.5px;margin-bottom:6px}
-        .hero-mentor-badge::before{font-size:11px}
-      }
-      @media(max-width:430px){
-        .hero{padding-top:14px}
-        h1.headline{font-size:33px}
-        .hero .sub{font-size:12.7px;margin-bottom:9px}
-        .hero-actions{margin-bottom:9px}
-        .hero-actions .btn-primary,.hero-actions .btn-ghost{padding:8px 12px;font-size:11.5px}
-        .hero-stats-panel .stat{padding:10px 3px}
-        .hero-stats-panel .stat-num{font-size:18px}
-        .hero-stats-panel .stat-label{font-size:8px}
-        .hero-bowl-wrap{padding:7px 0 8px}
-        .hero-bowl .dot-wrap{width:98px;height:98px}
-        .hero-bowl .dot-pct{font-size:20px}
-        .hero-feature-tiles{gap:8px}
-        .hero-live .live-drive-card,.hero-mentor-card{min-height:118px;padding:12px}
-        .hero-live .live-drive-card h3,.hero-mentor-card h3{font-size:17px}
-        .hero-live .live-drive-card p,.hero-mentor-card p{font-size:9.8px}
-      }
-    `;
-    document.head.appendChild(style);
-
-    // Preserve the existing stats and move them into the right-side opening panel.
-    const statsPanel = document.createElement('div');
-    statsPanel.className = 'hero-stats-panel';
-    statsPanel.appendChild(stats);
-
-    const bowlWrap = document.createElement('div');
-    bowlWrap.className = 'hero-bowl-wrap';
-    const bowlPanel = document.createElement('div');
-    bowlPanel.className = 'hero-bowl';
-    bowlPanel.appendChild(bowl);
-    bowlPanel.appendChild(bowlCaption);
-    bowlWrap.appendChild(bowlPanel);
-    statsPanel.appendChild(bowlWrap);
-    heroWrap.appendChild(statsPanel);
-
-    // Restore the Read the cause CTA in the main campaign message.
-    const actions = hero.querySelector('.hero-actions');
-    if(actions && !actions.querySelector('a[href="#about"]')){
-      const causeBtn = document.createElement('a');
-      causeBtn.href = '#about';
-      causeBtn.className = 'btn-ghost';
-      causeBtn.textContent = 'Read the cause';
-      actions.appendChild(causeBtn);
-    }
-
-    // Add compact live-drive + mentors feature tiles to the opening view.
-    const tiles = document.createElement('div');
-    tiles.className = 'hero-feature-tiles';
-
-    const livePanel = document.createElement('div');
-    livePanel.className = 'hero-live';
-    livePanel.appendChild(liveCard.cloneNode(true));
-
-    const mentorPanel = document.createElement('div');
-    mentorPanel.className = 'hero-mentors';
-    mentorPanel.innerHTML = `
-      <div class="hero-mentor-card">
-        <div class="hero-mentor-badge">Women Mentors Circle</div>
-        <h3>Mentors beyond the scholarship.</h3>
-        <p>Scholarships open the door. Mentors help students walk through it with guidance through their academic journey.</p>
-        <a class="hero-mentor-btn" href="#mentors">Meet the mentors →</a>
-      </div>`;
-
-    tiles.append(livePanel,mentorPanel);
-    heroWrap.appendChild(tiles);
-  }
-
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init,{once:true});
-  else init();
+    const hero=document.querySelector('.hero'), wrap=hero?.querySelector('.wrap'), bowl=document.querySelector('.dot-wrap'), cap=document.querySelector('.dot-caption'), live=document.querySelector('#live-drive .live-drive-card'), stats=document.querySelector('.stats'), mentorSection=document.querySelector('#mentors'), mentorGrid=mentorSection?.querySelector('.mentor-grid'), scholarship=document.querySelector('#scholarship .scholarship-card'), actions=document.querySelector('.hero-actions');
+    if(!hero||!wrap||!bowl||!cap||!live||!stats||!mentorGrid||!scholarship)return;
+    const style=document.createElement('style');style.id='opening-view-layout';style.textContent=`
+      .hero{padding:26px 0 22px;min-height:calc(100svh - 62px);display:flex;align-items:flex-start;text-align:left}
+      .hero>.wrap{width:100%;max-width:1120px;display:grid;grid-template-columns:minmax(0,1.18fr) minmax(390px,.82fr);column-gap:48px;row-gap:16px;align-items:start}
+      .hero .eyebrow{grid-column:1;margin-bottom:10px}.hero h1.headline{grid-column:1;font-size:clamp(38px,4.5vw,58px);line-height:1.01;max-width:700px;margin:0 0 10px;letter-spacing:-.02em}.hero .sub{grid-column:1;font-size:14px;line-height:1.42;max-width:630px;margin:0 0 15px}.hero-actions{grid-column:1;display:flex;justify-content:flex-start;margin:0;gap:9px}.hero-actions .btn-primary{padding:10px 21px;font-size:13.5px}.hero-actions .btn-ghost{padding:9px 18px;font-size:13.5px}
+      .hero-stats-bowl{grid-column:2;grid-row:1 / span 4;display:flex;flex-direction:column;align-items:center;gap:15px;padding-top:44px}.hero-stats{width:100%;max-width:520px;margin:0}.hero-stats .stat{padding:20px 10px}.hero-stats .stat-num{font-size:25px}.hero-bowl{display:flex;flex-direction:column;align-items:center}.hero-bowl .dot-wrap{width:180px;height:180px;margin:0}.hero-bowl .dot-pct{font-size:29px}.hero-bowl .dot-caption{margin-top:7px;margin-bottom:0}
+      .hero-feature-row{grid-column:1 / -1;width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:2px}.hero-feature-card{min-width:0}.hero-live,.hero-mentors,.hero-scholarship{display:flex}.hero-live .live-drive-card{width:100%;margin:0;min-height:168px;padding:20px 22px;display:flex;align-items:center}.hero-live .live-drive-card h3{font-size:23px;margin-bottom:6px}.hero-live .live-drive-card p{font-size:12px;line-height:1.42;margin-bottom:10px}.hero-live .live-drive-btn{padding:8px 14px;font-size:12px}.hero-live .live-drive-note{font-size:9px!important;margin-top:7px!important}.hero-mentors .mentor-tile,.hero-scholarship .scholarship-tile{width:100%;background:var(--white);border:1px solid var(--line);border-radius:var(--radius);padding:20px 21px;display:flex;flex-direction:column;justify-content:center;min-height:168px}.tile-label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);font-weight:700;margin-bottom:8px}.hero-mentors h3,.hero-scholarship h3{font-family:'Fraunces',serif;font-size:22px;line-height:1.1;margin:0 0 7px;font-weight:600}.hero-mentors p,.hero-scholarship p{font-size:12px;line-height:1.42;color:var(--ink-soft);margin:0 0 7px}.hero-mentors .tile-link,.hero-scholarship a{color:var(--red-deep);font-size:11.5px;font-weight:600;text-decoration:underline;margin-top:auto}#live-drive,#mentors,#scholarship{display:none}
+      @media(max-width:900px){.hero>.wrap{grid-template-columns:minmax(0,1.05fr) minmax(320px,.95fr);column-gap:28px}.hero h1.headline{font-size:clamp(35px,5.1vw,50px)}.hero-stats-bowl{padding-top:34px}.hero-feature-row{gap:10px}.hero-live .live-drive-card,.hero-mentors .mentor-tile,.hero-scholarship .scholarship-tile{padding:17px;min-height:155px}.hero-live .live-drive-card h3,.hero-mentors h3,.hero-scholarship h3{font-size:19px}}
+      @media(max-width:700px){.hero{padding:17px 0 18px;min-height:calc(100svh - 60px)}.hero>.wrap{display:flex;flex-direction:column;align-items:stretch;padding:0 18px;gap:0}.hero .eyebrow{font-size:9.5px;letter-spacing:.1em;margin-bottom:8px;text-align:center;align-self:center}.hero h1.headline{font-size:clamp(32px,8.5vw,42px);line-height:1.01;max-width:600px;margin:0 auto 9px;text-align:center}.hero .sub{font-size:12.8px;line-height:1.42;max-width:520px;margin:0 auto 11px;text-align:center}.hero-actions{justify-content:center;margin-bottom:11px}.hero-actions .btn-primary{padding:8px 16px;font-size:12px}.hero-actions .btn-ghost{padding:7px 14px;font-size:12px}.hero-stats-bowl{padding:0;gap:7px}.hero-stats .stat{padding:9px 5px}.hero-stats .stat-num{font-size:18px}.hero-stats .stat-label{font-size:8px;margin-top:2px}.hero-bowl .dot-wrap{width:110px;height:110px}.hero-bowl .dot-pct{font-size:20px}.hero-bowl .dot-caption{font-size:8.5px;margin-top:4px}.hero-feature-row{grid-template-columns:1fr;gap:8px;margin-top:8px}.hero-live .live-drive-card,.hero-mentors .mentor-tile,.hero-scholarship .scholarship-tile{min-height:0;padding:14px 15px}.hero-live .live-drive-card h3,.hero-mentors h3,.hero-scholarship h3{font-size:19px}.hero-live .live-drive-card p,.hero-mentors p,.hero-scholarship p{font-size:11px;line-height:1.38}.hero-live .live-drive-note{font-size:8.5px!important}}
+      @media(max-width:390px){.hero{padding-top:12px}.hero h1.headline{font-size:31px}.hero .sub{font-size:12px;margin-bottom:8px}.hero-actions{margin-bottom:8px}.hero-bowl .dot-wrap{width:98px;height:98px}.hero-bowl .dot-pct{font-size:18px}.hero-stats .stat-num{font-size:17px}}
+    `;document.head.appendChild(style);
+    const side=document.createElement('div');side.className='hero-stats-bowl';stats.classList.add('hero-stats');side.appendChild(stats);const bp=document.createElement('div');bp.className='hero-bowl';bp.append(bowl,cap);side.appendChild(bp);wrap.appendChild(side);
+    const row=document.createElement('div');row.className='hero-feature-row';
+    const lp=document.createElement('div');lp.className='hero-live hero-feature-card';lp.appendChild(live.cloneNode(true));
+    const mp=document.createElement('div');mp.className='hero-mentors hero-feature-card';mp.innerHTML='<div class="mentor-tile"><div class="tile-label">🤝 Women Mentors Circle</div><h3>Mentors beyond the scholarship.</h3><p>Scholarships open the door. Mentors help students walk through it with guidance through their academic journey.</p><a class="tile-link" href="#mentors" onclick="document.querySelector(\'#mentors\')?.scrollIntoView({behavior:\'smooth\'});return false;">Meet the mentors →</a></div>';
+    const sp=document.createElement('div');sp.className='hero-scholarship hero-feature-card';sp.innerHTML='<div class="scholarship-tile"><div class="tile-label">🎓 Scholarship</div><h3>Scholarship design in progress.</h3><p>Eligibility, selection and support details are being finalised and will be published on the YDF portal alongside other running scholarships.</p><a href="https://apply.ydfindia.org" target="_blank" rel="noopener">Visit YDF scholarship portal →</a></div>';
+    row.append(lp,mp,sp);wrap.appendChild(row);if(actions)actions.style.display='flex';
+  }if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
