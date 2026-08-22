@@ -18,6 +18,9 @@ on public.live_location
 for select
 using (true);
 
+-- Explicit grants ensure the browser's anon/publishable client can perform the public SELECT.
+grant select on public.live_location to anon, authenticated;
+
 -- The authenticated driver can only manage their own location row.
 drop policy if exists "Driver can insert own location" on public.live_location;
 create policy "Driver can insert own location"
