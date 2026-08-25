@@ -7,25 +7,47 @@ window.__SUPABASE_PUBLISHABLE_KEY__ = 'sb_publishable_ay6SofsXxPxSjZZBb-XOXg_nRe
 (function setupOpeningView(){
   function init(){
     const hero=document.querySelector('.hero'), wrap=hero?.querySelector('.wrap'), bowl=document.querySelector('.dot-wrap'), cap=document.querySelector('.dot-caption'), live=document.querySelector('#live-drive .live-drive-card'), stats=document.querySelector('.stats'), mentorSection=document.querySelector('#mentors'), mentorGrid=mentorSection?.querySelector('.mentor-grid'), scholarship=document.querySelector('#scholarship .scholarship-card'), actions=document.querySelector('.hero-actions');
-    if(!hero||!wrap||!bowl||!cap||!live||!stats||!mentorGrid||!scholarship)return;
+    if(!hero||!wrap||!bowl||!cap||!live||!stats||!mentorSection||!mentorGrid||!scholarship)return;
     const style=document.createElement('style');style.id='opening-view-layout';style.textContent=`
       .hero{padding:26px 0 22px;min-height:calc(100svh - 62px);display:flex;align-items:flex-start;text-align:left}
       .hero>.wrap{width:100%;max-width:1120px;display:grid;grid-template-columns:minmax(0,1.18fr) minmax(390px,.82fr);column-gap:48px;row-gap:16px;align-items:start}
       .hero .eyebrow{grid-column:1;margin-bottom:10px}.hero h1.headline{grid-column:1;font-size:clamp(38px,4.5vw,58px);line-height:1.01;max-width:700px;margin:0 0 10px;letter-spacing:-.02em}.hero .sub{grid-column:1;font-size:14px;line-height:1.42;max-width:630px;margin:0 0 15px}.hero-actions{grid-column:1;display:flex;justify-content:flex-start;margin:0;gap:9px}.hero-actions .btn-primary{padding:10px 21px;font-size:13.5px}.hero-actions .btn-ghost{padding:9px 18px;font-size:13.5px}
       .hero-stats-bowl{grid-column:2;grid-row:1 / span 4;display:flex;flex-direction:column;align-items:center;gap:15px;padding-top:44px}.hero-stats{width:100%;max-width:520px;margin:0}.hero-stats .stat{padding:20px 10px}.hero-stats .stat-num{font-size:25px}.hero-bowl{display:flex;flex-direction:column;align-items:center}.hero-bowl .dot-wrap{width:180px;height:180px;margin:0}.hero-bowl .dot-pct{font-size:29px}.hero-bowl .dot-caption{margin-top:7px;margin-bottom:0}
-      .hero-feature-row{grid-column:1 / -1;width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:2px}.hero-feature-card{min-width:0}.hero-live,.hero-mentors,.hero-scholarship{display:flex}.hero-live .live-drive-card{width:100%;margin:0;min-height:168px;padding:20px 22px;display:flex;align-items:center}.hero-live .live-drive-card h3{font-size:23px;margin-bottom:6px}.hero-live .live-drive-card p{font-size:12px;line-height:1.42;margin-bottom:10px}.hero-live .live-drive-btn{padding:8px 14px;font-size:12px}.hero-live .live-drive-note{font-size:9px!important;margin-top:7px!important}.hero-mentors .mentor-tile,.hero-scholarship .scholarship-tile{width:100%;background:var(--white);border:1px solid var(--line);border-radius:var(--radius);padding:20px 21px;display:flex;flex-direction:column;justify-content:center;min-height:168px}.tile-label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);font-weight:700;margin-bottom:8px}.hero-mentors h3,.hero-scholarship h3{font-family:'Fraunces',serif;font-size:22px;line-height:1.1;margin:0 0 7px;font-weight:600}.hero-mentors p,.hero-scholarship p{font-size:12px;line-height:1.42;color:var(--ink-soft);margin:0 0 7px}.hero-mentors .tile-link,.hero-scholarship a{color:var(--red-deep);font-size:11.5px;font-weight:600;text-decoration:underline;margin-top:auto}#live-drive,#mentors,#scholarship{display:none}
+      .hero-feature-row{grid-column:1 / -1;width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:2px}.hero-feature-card{min-width:0}.hero-live,.hero-mentors,.hero-scholarship{display:flex}.hero-live .live-drive-card{width:100%;margin:0;min-height:168px;padding:20px 22px;display:flex;align-items:center}.hero-live .live-drive-card h3{font-size:23px;margin-bottom:6px}.hero-live .live-drive-card p{font-size:12px;line-height:1.42;margin-bottom:10px}.hero-live .live-drive-btn{padding:8px 14px;font-size:12px}.hero-live .live-drive-note{font-size:9px!important;margin-top:7px!important}.hero-mentors .mentor-tile,.hero-scholarship .scholarship-tile{width:100%;background:var(--white);border:1px solid var(--line);border-radius:var(--radius);padding:20px 21px;display:flex;flex-direction:column;justify-content:center;min-height:168px}.tile-label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);font-weight:700;margin-bottom:8px}.hero-mentors h3,.hero-scholarship h3{font-family:'Fraunces',serif;font-size:22px;line-height:1.1;margin:0 0 7px;font-weight:600}.hero-mentors p,.hero-scholarship p{font-size:12px;line-height:1.42;color:var(--ink-soft);margin:0 0 7px}.hero-mentors .tile-link,.hero-scholarship a{color:var(--red-deep);font-size:11.5px;font-weight:600;text-decoration:underline;margin-top:auto}
       @media(max-width:900px){.hero>.wrap{grid-template-columns:minmax(0,1.05fr) minmax(320px,.95fr);column-gap:28px}.hero h1.headline{font-size:clamp(35px,5.1vw,50px)}.hero-stats-bowl{padding-top:34px}.hero-feature-row{gap:10px}.hero-live .live-drive-card,.hero-mentors .mentor-tile,.hero-scholarship .scholarship-tile{padding:17px;min-height:155px}.hero-live .live-drive-card h3,.hero-mentors h3,.hero-scholarship h3{font-size:19px}}
       @media(max-width:700px){.hero{padding:17px 0 18px;min-height:calc(100svh - 60px)}.hero>.wrap{display:flex;flex-direction:column;align-items:stretch;padding:0 18px;gap:0}.hero .eyebrow{font-size:9.5px;letter-spacing:.1em;margin-bottom:8px;text-align:center;align-self:center}.hero h1.headline{font-size:clamp(32px,8.5vw,42px);line-height:1.01;max-width:600px;margin:0 auto 9px;text-align:center}.hero .sub{font-size:12.8px;line-height:1.42;max-width:520px;margin:0 auto 11px;text-align:center}.hero-actions{justify-content:center;margin-bottom:11px}.hero-actions .btn-primary{padding:8px 16px;font-size:12px}.hero-actions .btn-ghost{padding:7px 14px;font-size:12px}.hero-stats-bowl{padding:0;gap:7px}.hero-stats .stat{padding:9px 5px}.hero-stats .stat-num{font-size:18px}.hero-stats .stat-label{font-size:8px;margin-top:2px}.hero-bowl .dot-wrap{width:110px;height:110px}.hero-bowl .dot-pct{font-size:20px}.hero-bowl .dot-caption{font-size:8.5px;margin-top:4px}.hero-feature-row{grid-template-columns:1fr;gap:8px;margin-top:8px}.hero-live .live-drive-card,.hero-mentors .mentor-tile,.hero-scholarship .scholarship-tile{min-height:0;padding:14px 15px}.hero-live .live-drive-card h3,.hero-mentors h3,.hero-scholarship h3{font-size:19px}.hero-live .live-drive-card p,.hero-mentors p,.hero-scholarship p{font-size:11px;line-height:1.38}.hero-live .live-drive-note{font-size:8.5px!important}}
       @media(max-width:390px){.hero{padding-top:12px}.hero h1.headline{font-size:31px}.hero .sub{font-size:12px;margin-bottom:8px}.hero-actions{margin-bottom:8px}.hero-bowl .dot-wrap{width:98px;height:98px}.hero-bowl .dot-pct{font-size:18px}.hero-stats .stat-num{font-size:17px}}
     `;document.head.appendChild(style);
-    // Keep the headline as one continuous sentence: no forced line break after “drive”.
+
+    // Keep the headline as one continuous sentence.
     const headline=hero.querySelector('h1.headline');
     if(headline) headline.innerHTML=headline.innerHTML.replace(/<\/em>\s*<br\s*\/?>(\s*)/i,'</em> ');
+
+    // Move the existing stats and bowl into the opening view.
     const side=document.createElement('div');side.className='hero-stats-bowl';stats.classList.add('hero-stats');side.appendChild(stats);const bp=document.createElement('div');bp.className='hero-bowl';bp.append(bowl,cap);side.appendChild(bp);wrap.appendChild(side);
+
+    // Add the three feature tiles.
     const row=document.createElement('div');row.className='hero-feature-row';
     const lp=document.createElement('div');lp.className='hero-live hero-feature-card';lp.appendChild(live.cloneNode(true));
-    const mp=document.createElement('div');mp.className='hero-mentors hero-feature-card';mp.innerHTML='<div class="mentor-tile"><div class="tile-label">🤝 Women Mentors Circle</div><h3>Mentors beyond the scholarship.</h3><p>Scholarships open the door. Mentors help students walk through it with guidance through their academic journey.</p><a class="tile-link" href="#mentors" onclick="const s=document.querySelector(\'#mentors\');if(s){s.style.display=\'block\';s.scrollIntoView({behavior:\'smooth\',block:\'start\');}return false;">Meet the mentors →</a></div>';
+    const mp=document.createElement('div');mp.className='hero-mentors hero-feature-card';
+    mp.innerHTML='<div class="mentor-tile"><div class="tile-label">🤝 Women Mentors Circle</div><h3>Mentors beyond the scholarship.</h3><p>Scholarships open the door. Mentors help students walk through it with guidance through their academic journey.</p><a class="tile-link" href="#mentors">Meet the mentors →</a></div>';
     const sp=document.createElement('div');sp.className='hero-scholarship hero-feature-card';sp.innerHTML='<div class="scholarship-tile"><div class="tile-label">🎓 Scholarship</div><h3>Scholarship design in progress.</h3><p>Eligibility, selection and support details are being finalised and will be published on the YDF portal alongside other running scholarships.</p><a href="https://apply.ydfindia.org" target="_blank" rel="noopener">Visit YDF scholarship portal →</a></div>';
     row.append(lp,mp,sp);wrap.appendChild(row);if(actions)actions.style.display='flex';
-  }if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+
+    // The compact hero temporarily hides the full sections. When the user clicks
+    // “Meet the mentors”, explicitly reveal the original section and then scroll to it.
+    const mentorLink=mp.querySelector('.tile-link');
+    mentorLink?.addEventListener('click',function(e){
+      e.preventDefault();
+      mentorSection.style.display='block';
+      mentorSection.removeAttribute('hidden');
+      mentorSection.style.visibility='visible';
+      mentorSection.style.opacity='1';
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{
+        mentorSection.scrollIntoView({behavior:'smooth',block:'start'});
+        history.replaceState(null,'','#mentors');
+      }));
+    });
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
