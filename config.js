@@ -19,26 +19,23 @@ window.__SUPABASE_PUBLISHABLE_KEY__ = 'sb_publishable_ay6SofsXxPxSjZZBb-XOXg_nRe
       @media(max-width:390px){.hero{padding-top:12px}.hero h1.headline{font-size:31px}.hero .sub{font-size:12px;margin-bottom:8px}.hero-actions{margin-bottom:8px}.hero-bowl .dot-wrap{width:98px;height:98px}.hero-bowl .dot-pct{font-size:18px}.hero-stats .stat-num{font-size:17px}}
     `;document.head.appendChild(style);
 
+    // Keep the headline as one continuous sentence.
     const headline=hero.querySelector('h1.headline');
-    if(headline) headline.innerHTML=headline.innerHTML.replace(/<\\/em>\\s*<br\\s*\\/?>(\\s*)/i,'</em> ');
+    if(headline) headline.innerHTML=headline.innerHTML.replace(/<\/em>\s*<br\s*\/?>(\s*)/i,'</em> ');
 
+    // Move the existing stats and bowl into the opening view.
     const side=document.createElement('div');side.className='hero-stats-bowl';stats.classList.add('hero-stats');side.appendChild(stats);const bp=document.createElement('div');bp.className='hero-bowl';bp.append(bowl,cap);side.appendChild(bp);wrap.appendChild(side);
 
+    // Add the three feature tiles.
     const row=document.createElement('div');row.className='hero-feature-row';
     const lp=document.createElement('div');lp.className='hero-live hero-feature-card';lp.appendChild(live.cloneNode(true));
-    const mp=document.createElement('div');mp.className='hero-mentors hero-feature-card';mp.innerHTML='<div class="mentor-tile"><div class="tile-label">🤝 Women Mentors Circle</div><h3>Mentors beyond the scholarship.</h3><p>Scholarships open the door. Mentors help students walk through it with guidance through their academic journey.</p><a class="tile-link" href="#mentors">Meet the mentors →</a></div>';
+    const mp=document.createElement('div');mp.className='hero-mentors hero-feature-card';
+    mp.innerHTML='<div class="mentor-tile"><div class="tile-label">🤝 Women Mentors Circle</div><h3>Mentors beyond the scholarship.</h3><p>Scholarships open the door. Mentors help students walk through it with guidance through their academic journey.</p><a class="tile-link" href="#mentors">Meet the mentors →</a></div>';
     const sp=document.createElement('div');sp.className='hero-scholarship hero-feature-card';sp.innerHTML='<div class="scholarship-tile"><div class="tile-label">🎓 Scholarship</div><h3>Scholarship design in progress.</h3><p>Eligibility, selection and support details are being finalised and will be published on the YDF portal alongside other running scholarships.</p><a href="https://apply.ydfindia.org" target="_blank" rel="noopener">Visit YDF scholarship portal →</a></div>';
     row.append(lp,mp,sp);wrap.appendChild(row);if(actions)actions.style.display='flex';
 
-    // Add Nisha as the sixth mentor without altering the existing five mentor records.
-    if(!mentorGrid.querySelector('[data-mentor="nisha-alavandi"]')){
-      const card=document.createElement('div');
-      card.className='mentor-card';
-      card.dataset.mentor='nisha-alavandi';
-      card.innerHTML='<div class="mentor-name">Nisha Alavandi</div><div class="mentor-role">Sr. Manager, Logistics &amp; Fulfillment, ChargePoint</div><div class="mentor-city">Amsterdam</div>';
-      mentorGrid.appendChild(card);
-    }
-
+    // The compact hero temporarily hides the full sections. When the user clicks
+    // “Meet the mentors”, explicitly reveal the original section and then scroll to it.
     const mentorLink=mp.querySelector('.tile-link');
     mentorLink?.addEventListener('click',function(e){
       e.preventDefault();
@@ -51,6 +48,15 @@ window.__SUPABASE_PUBLISHABLE_KEY__ = 'sb_publishable_ay6SofsXxPxSjZZBb-XOXg_nRe
         history.replaceState(null,'','#mentors');
       }));
     });
+
+    // Add Nisha Alavandi as the sixth mentor in the same card format as the existing mentors.
+    if(!mentorGrid.querySelector('[data-mentor="nisha-alavandi"]')){
+      const nisha=document.createElement('div');
+      nisha.className='mentor-card';
+      nisha.dataset.mentor='nisha-alavandi';
+      nisha.innerHTML='<div class="mentor-name">Nisha Alavandi</div><div class="mentor-role">Sr. Manager, Logistics &amp; Fulfillment, ChargePoint</div><div class="mentor-city">Amsterdam</div>';
+      mentorGrid.appendChild(nisha);
+    }
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
